@@ -1,0 +1,24 @@
+# Ignore virtual environment
+venv/
+
+# Ignore .env files (containing secrets)
+.env
+
+# Ignore ChromaDB data directory
+chroma_db/
+
+# Ignore chat history directory
+chat_histories/
+
+# Ignore uploads directory
+uploads/
+
+# Ignore logs directory
+logs/
+
+# Ignore pycache
+__pycache__/
+
+# Ignore any other generated files or directories you don't want to track
+*.pyc
+*.log

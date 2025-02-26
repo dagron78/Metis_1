@@ -1,0 +1,3973 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+frontend/
+  static/
+    css/
+      styles.css
+    js/
+      app.js
+  templates/
+    base.html
+    chat.html
+    documents.html
+    error.html
+    index.html
+    login.html
+    stats.html
+src/
+  api/
+    models/
+      auth.py
+      requests.py
+      responses.py
+    routers/
+      auth.py
+      system.py
+      web.py
+    dependencies.py
+    error_handlers.py
+  core/
+    config.py
+    exceptions.py
+    logging_config.py
+    ollama_client.py
+    text_generation.py
+  rag/
+    document_processor.py
+    query_engine.py
+    vector_store.py
+  main.py
+Test_Docs/
+  authentication_security.txt
+  rag_overview.txt
+docker-compose.yml
+Dockerfile
+GETTING_STARTED.md
+README.md
+requirements.txt
+start_docker.sh
+start.sh
+test_api.py
+
+================================================================
+Files
+================================================================
+
+================
+File: frontend/static/css/styles.css
+================
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+/* Code formatting */
+pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+}
+
+code {
+    background-color: #f1f1f1;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+/* Chat styles */
+.chat-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+.system-message {
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb;
+    color: #721c24 !important;
+    font-style: italic;
+}
+
+/* Document list styles */
+.document-card {
+    transition: transform 0.2s;
+}
+
+.document-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 1050;
+}
+
+/* Card hover effects */
+.card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Button styles */
+.btn {
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Navbar active link */
+.nav-link.active {
+    font-weight: bold;
+    border-bottom: 2px solid white;
+}
+
+/* Footer styles */
+.footer {
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message {
+        max-width: 90%;
+    }
+    
+    .jumbotron h1 {
+        font-size: 2rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* Dark mode support (if enabled by user) */
+@media (prefers-color-scheme: dark) {
+    .chat-messages {
+        background-color: #343a40;
+    }
+    
+    .assistant-message {
+        background-color: #495057;
+        color: #f8f9fa;
+    }
+    
+    code {
+        background-color: #343a40;
+        color: #f8f9fa;
+    }
+    
+    pre {
+        background-color: #343a40;
+        color: #f8f9fa;
+    }
+}
+
+================
+File: frontend/static/js/app.js
+================
+// Common JavaScript functions for the Metis RAG application
+
+// Format timestamps to local time
+function formatTimestamp(timestamp) {
+    if (!timestamp) return 'Unknown';
+    return new Date(timestamp).toLocaleString();
+}
+
+// Show toast notifications
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    
+    if (!toastContainer) {
+        // Create toast container if it doesn't exist
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(container);
+    }
+    
+    const toastId = 'toast-' + Date.now();
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.id = toastId;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    
+    document.getElementById('toastContainer').appendChild(toast);
+    
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    // Remove toast after it's hidden
+    toast.addEventListener('hidden.bs.toast', function () {
+        toast.remove();
+    });
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Format message content for display
+function formatMessage(content) {
+    // Convert URLs to links
+    content = content.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+    
+    // Convert markdown-style code blocks
+    content = content.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+    
+    // Convert markdown-style inline code
+    content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Convert line breaks to <br>
+    content = content.replace(/\n/g, '<br>');
+    
+    return content;
+}
+
+// Handle API errors
+function handleApiError(error, defaultMessage = 'An error occurred') {
+    console.error('API Error:', error);
+    
+    let errorMessage = defaultMessage;
+    if (error.response && error.response.data && error.response.data.detail) {
+        errorMessage = error.response.data.detail;
+    } else if (error.message) {
+        errorMessage = error.message;
+    }
+    
+    showToast(errorMessage, 'danger');
+    return errorMessage;
+}
+
+// Add active class to current nav item
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath || 
+            (href !== '/' && currentPath.startsWith(href))) {
+            link.classList.add('active');
+        }
+    });
+});
+
+// Add CSRF token to all fetch requests if available
+document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token from meta tag (if using CSRF protection)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    if (csrfToken) {
+        // Add CSRF token to all fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            // Only add for same-origin requests
+            if (url.startsWith('/') || url.startsWith(window.location.origin)) {
+                options.headers = options.headers || {};
+                options.headers['X-CSRF-Token'] = csrfToken;
+            }
+            return originalFetch(url, options);
+        };
+    }
+});
+
+// Escape HTML to prevent XSS
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+================
+File: frontend/templates/base.html
+================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Metis RAG System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Metis RAG</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/documents">Documents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/stats">Stats</a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
+                    {% if user %}
+                    <span class="nav-item nav-link">Welcome, {{ user.username }}</span>
+                    <a class="nav-link" href="/logout">Logout</a>
+                    {% else %}
+                    <a class="nav-link" href="/login">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.type }}">
+                {{ message.text }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Metis RAG System &copy; 2025</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+
+================
+File: frontend/templates/chat.html
+================
+{% extends "base.html" %}
+
+{% block title %}Chat - Metis RAG{% endblock %}
+
+{% block head %}
+<style>
+    .chat-container {
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+    }
+    
+    .message {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+    }
+    
+    .user-message {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+    
+    .assistant-message {
+        background-color: #e9ecef;
+        color: #212529;
+        align-self: flex-start;
+    }
+    
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
+    
+    .chat-input {
+        margin-top: 1rem;
+    }
+    
+    .model-selector {
+        margin-bottom: 1rem;
+    }
+    
+    .system-message {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+        font-style: italic;
+    }
+    
+    .source-info {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Chat with Your Documents</h1>
+    
+    <div class="model-selector">
+        <select class="form-select" id="modelSelector">
+            <option value="">Loading models...</option>
+        </select>
+    </div>
+</div>
+
+{% if doc_id %}
+<div class="alert alert-info">
+    <strong>Document Filter Active:</strong> You are querying a specific document. <a href="/chat" class="alert-link">Clear filter</a>
+</div>
+{% endif %}
+
+<div class="chat-container card">
+    <div class="chat-messages" id="chatMessages">
+        <div class="message assistant-message">
+            <div class="message-content">
+                Hello! I'm your RAG assistant. Ask me questions about your documents.
+                {% if doc_id %}
+                <br><br>You are currently querying a specific document.
+                {% endif %}
+            </div>
+            <div class="message-time">Now</div>
+        </div>
+    </div>
+    
+    <div class="chat-input p-3">
+        <form id="chatForm">
+            <div class="input-group">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type your question..." required>
+                <button class="btn btn-primary" type="submit" id="sendButton">
+                    <span id="sendButtonText">Send</span>
+                    <span id="sendButtonSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Chat History</h5>
+    </div>
+    <div class="card-body">
+        <div class="list-group" id="chatHistoryList">
+            <!-- Chat history will be loaded here -->
+            <div class="text-center">No chat history yet</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentModel = '';
+    let chatHistoryId = '';
+    let docId = new URLSearchParams(window.location.search).get('doc_id');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        loadModels();
+        
+        // Chat form handling
+        const chatForm = document.getElementById('chatForm');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const sendButtonText = document.getElementById('sendButtonText');
+        const sendButtonSpinner = document.getElementById('sendButtonSpinner');
+        
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Disable input and show spinner
+            messageInput.disabled = true;
+            sendButtonText.classList.add('d-none');
+            sendButtonSpinner.classList.remove('d-none');
+            
+            // Send query to API
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: message,
+                    model_name: currentModel || undefined,
+                    doc_id: docId || undefined,
+                    chat_history_id: chatHistoryId || undefined
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Query failed: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Add assistant response to chat
+                addMessage(data.response, 'assistant');
+                
+                // Save chat history ID
+                chatHistoryId = data.chat_history_id;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Sorry, an error occurred while processing your request: ' + error.message, 'assistant', true);
+            })
+            .finally(() => {
+                // Re-enable input and hide spinner
+                messageInput.disabled = false;
+                messageInput.value = '';
+                messageInput.focus();
+                sendButtonText.classList.remove('d-none');
+                sendButtonSpinner.classList.add('d-none');
+            });
+        });
+        
+        // Model selector handling
+        document.getElementById('modelSelector').addEventListener('change', function(e) {
+            currentModel = e.target.value;
+            
+            if (currentModel) {
+                fetch(`/system/models/${currentModel}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Model switch failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    addMessage(`Switched to model: ${data.current_model}`, 'assistant', true);
+                })
+                .catch(error => {
+                    console.error('Error switching model:', error);
+                    addMessage('Error switching model: ' + error.message, 'assistant', true);
+                });
+            }
+        });
+    });
+    
+    function loadModels() {
+        fetch('/system/models')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load models: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const modelSelector = document.getElementById('modelSelector');
+                modelSelector.innerHTML = '<option value="">Default Model</option>';
+                
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelector.appendChild(option);
+                });
+                
+                // Get current model
+                fetch('/system/models/current')
+                    .then(response => response.json())
+                    .then(data => {
+                        currentModel = data.current_model;
+                        
+                        // Select current model in dropdown
+                        for (let i = 0; i < modelSelector.options.length; i++) {
+                            if (modelSelector.options[i].value === currentModel) {
+                                modelSelector.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    });
+            })
+            .catch(error => {
+                console.error('Error loading models:', error);
+                document.getElementById('modelSelector').innerHTML = '<option value="">Default Model</option>';
+            });
+    }
+    
+    function addMessage(content, sender, isSystem = false) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        
+        messageDiv.className = `message ${sender}-message`;
+        if (isSystem) messageDiv.classList.add('system-message');
+        
+        messageDiv.innerHTML = `
+            <div class="message-content">${formatMessage(content)}</div>
+            <div class="message-time">${new Date().toLocaleTimeString()}</div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function formatMessage(content) {
+        // Convert URLs to links
+        content = content.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        
+        // Convert markdown-style code blocks
+        content = content.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+        
+        // Convert markdown-style inline code
+        content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
+        // Convert line breaks to <br>
+        content = content.replace(/\n/g, '<br>');
+        
+        return content;
+    }
+</script>
+{% endblock %}
+
+================
+File: frontend/templates/documents.html
+================
+{% extends "base.html" %}
+
+{% block title %}Documents - Metis RAG{% endblock %}
+
+{% block content %}
+<h1>Document Management</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Upload Documents</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" action="/upload" enctype="multipart/form-data" id="uploadForm">
+            <div class="mb-3">
+                <label for="files" class="form-label">Select Files</label>
+                <input class="form-control" type="file" id="files" name="files" multiple>
+                <div class="form-text">Supported formats: PDF, TXT, DOCX</div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="uploadBtn">Upload</button>
+        </form>
+        <div class="progress mt-3 d-none" id="uploadProgress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">Document List</h3>
+        <button class="btn btn-sm btn-outline-danger" id="clearAllBtn">Clear All</button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="documentsTable">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Type</th>
+                        <th>Chunks</th>
+                        <th>Added</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="documentsList">
+                    <!-- Documents will be loaded here -->
+                    <tr>
+                        <td colspan="5" class="text-center">Loading documents...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Document management JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDocuments();
+        
+        // Upload form handling
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = uploadProgress.querySelector('.progress-bar');
+        
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            
+            uploadBtn.disabled = true;
+            uploadProgress.classList.remove('d-none');
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Upload failed: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showToast('Documents uploaded successfully', 'success');
+                setTimeout(loadDocuments, 2000); // Reload after a delay
+            })
+            .catch(error => {
+                showToast('Error uploading documents: ' + error, 'danger');
+            })
+            .finally(() => {
+                uploadBtn.disabled = false;
+                uploadProgress.classList.add('d-none');
+                uploadForm.reset();
+            });
+            
+            // Simulate progress (in a real app, you'd use actual progress events)
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${Math.min(progress, 95)}%`;
+                if (progress >= 95) clearInterval(interval);
+            }, 200);
+        });
+        
+        // Clear all documents
+        document.getElementById('clearAllBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete ALL documents? This cannot be undone.')) {
+                fetch('/clear', {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Clear failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showToast(data.message, 'success');
+                    loadDocuments();
+                })
+                .catch(error => {
+                    showToast('Error clearing documents: ' + error, 'danger');
+                });
+            }
+        });
+    });
+    
+    function loadDocuments() {
+        fetch('/documents')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load documents: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const documentsList = document.getElementById('documentsList');
+                
+                if (data.documents.length === 0) {
+                    documentsList.innerHTML = '<tr><td colspan="5" class="text-center">No documents found</td></tr>';
+                    return;
+                }
+                
+                documentsList.innerHTML = '';
+                data.documents.forEach(doc => {
+                    const addedDate = new Date(doc.added_at).toLocaleString();
+                    documentsList.innerHTML += `
+                        <tr>
+                            <td>${doc.file_name}</td>
+                            <td>${doc.file_type}</td>
+                            <td>${doc.chunk_count}</td>
+                            <td>${addedDate}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="queryDocument('${doc.doc_id}')">Query</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(error => {
+                showToast('Error loading documents: ' + error, 'danger');
+            });
+    }
+    
+    function queryDocument(docId) {
+        window.location.href = `/chat?doc_id=${docId}`;
+    }
+    
+    function showToast(message, type) {
+        const toastContainer = document.getElementById('toastContainer');
+        const toastId = 'toast-' + Date.now();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.id = toastId;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+</script>
+{% endblock %}
+
+================
+File: frontend/templates/error.html
+================
+{% extends "base.html" %}
+
+{% block title %}Error - Metis RAG{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h3 class="card-title">Error</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-exclamation-triangle-fill text-danger" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                </div>
+                
+                <h4 class="text-center mb-4">{{ error }}</h4>
+                
+                <p class="text-center">
+                    An error occurred while processing your request. Please try again later or contact the administrator.
+                </p>
+                
+                <div class="d-grid gap-2 col-6 mx-auto mt-4">
+                    <a href="/" class="btn btn-primary">Return to Home</a>
+                    <button class="btn btn-outline-secondary" onclick="window.history.back()">Go Back</button>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small>If this problem persists, please check the application logs for more information.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+================
+File: frontend/templates/index.html
+================
+{% extends "base.html" %}
+
+{% block title %}Home - Metis RAG{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-light p-5 rounded">
+    <h1 class="display-4">Welcome to Metis RAG</h1>
+    <p class="lead">A powerful Retrieval-Augmented Generation system for your documents.</p>
+    <hr class="my-4">
+    <p>Upload documents, ask questions, and get AI-powered answers based on your content.</p>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary btn-lg" href="/documents" role="button">Manage Documents</a>
+        <a class="btn btn-success btn-lg" href="/chat" role="button">Start Chatting</a>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Upload Documents</h5>
+                <p class="card-text">Upload your documents to make them available for querying. Supported formats include PDF, TXT, and DOCX files.</p>
+                <a href="/documents" class="btn btn-primary">Go to Documents</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Ask Questions</h5>
+                <p class="card-text">Ask questions about your documents and get AI-powered answers using state-of-the-art language models.</p>
+                <a href="/chat" class="btn btn-primary">Go to Chat</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">System Stats</h5>
+                <p class="card-text">View system statistics, document counts, and performance metrics to monitor your RAG system.</p>
+                <a href="/stats" class="btn btn-primary">View Stats</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <h2>About Metis RAG</h2>
+    <p>
+        Metis RAG is a Retrieval-Augmented Generation system that combines the power of large language models with your own documents.
+        This allows you to get accurate, contextually relevant answers to your questions based on the content of your documents.
+    </p>
+    <p>
+        Key features:
+    </p>
+    <ul>
+        <li>Upload and process multiple document formats</li>
+        <li>Secure authentication system</li>
+        <li>Interactive chat interface</li>
+        <li>Support for multiple language models</li>
+        <li>Document-specific querying</li>
+        <li>Comprehensive logging and error handling</li>
+    </ul>
+</div>
+{% endblock %}
+
+================
+File: frontend/templates/login.html
+================
+{% extends "base.html" %}
+
+{% block title %}Login - Metis RAG{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Login</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/login">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+                <p class="mb-0">Default credentials (if authentication is enabled):</p>
+                <ul class="mb-0">
+                    <li>Username: admin</li>
+                    <li>Password: securepassword</li>
+                </ul>
+                <p class="mt-2 mb-0 small">Note: These can be changed in the .env file or docker-compose.yml</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+================
+File: frontend/templates/stats.html
+================
+{% extends "base.html" %}
+
+{% block title %}Stats - Metis RAG{% endblock %}
+
+{% block content %}
+<h1>System Statistics</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Vector Store</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Documents
+                        <span class="badge bg-primary rounded-pill">{{ stats.vector_store.total_documents }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Collection Name
+                        <span class="badge bg-secondary rounded-pill">{{ stats.vector_store.collection_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Embedding Model
+                        <span class="badge bg-info rounded-pill">{{ stats.vector_store.embedding_model }}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer text-muted">
+                <small>Location: {{ stats.vector_store.persist_directory }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Uploads</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Files
+                        <span class="badge bg-primary rounded-pill">{{ uploads_count }}</span>
+                    </li>
+                </ul>
+                
+                <div class="mt-3">
+                    <h5>Upload Directory</h5>
+                    <code>{{ stats.uploads_dir }}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Chat Histories</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Chat Histories
+                        <span class="badge bg-primary rounded-pill">{{ chat_histories_count }}</span>
+                    </li>
+                </ul>
+                
+                <div class="mt-3">
+                    <h5>Chat Histories Directory</h5>
+                    <code>{{ stats.chat_histories_dir }}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">System Information</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Authentication</h5>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="authEnabled" disabled {% if auth_enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="authEnabled">Authentication Enabled</label>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h5>API Endpoints</h5>
+                <ul>
+                    <li><a href="/system/models" target="_blank">/system/models</a> - List available models</li>
+                    <li><a href="/documents" target="_blank">/documents</a> - List documents</li>
+                    <li><a href="/stats" target="_blank">/stats</a> - System statistics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">System Actions</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-danger" id="clearSystemBtn">Clear All Data</button>
+                </div>
+                <small class="text-muted mt-1">This will delete all documents, vector store data, and chat histories.</small>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" id="refreshStatsBtn">Refresh Statistics</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear system button
+        document.getElementById('clearSystemBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear ALL data? This will delete all documents, vector store data, and chat histories. This action cannot be undone.')) {
+                fetch('/clear', {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Clear failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showToast(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                })
+                .catch(error => {
+                    showToast('Error clearing system: ' + error, 'danger');
+                });
+            }
+        });
+        
+        // Refresh stats button
+        document.getElementById('refreshStatsBtn').addEventListener('click', function() {
+            window.location.reload();
+        });
+    });
+    
+    function showToast(message, type) {
+        const toastContainer = document.getElementById('toastContainer');
+        const toastId = 'toast-' + Date.now();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.id = toastId;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+</script>
+{% endblock %}
+
+================
+File: src/api/models/auth.py
+================
+# src/api/models/auth.py
+from datetime import datetime, timedelta
+from typing import Optional
+from pydantic import BaseModel
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from src.core.config import settings
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class User(BaseModel):
+    username: str
+    disabled: Optional[bool] = None
+
+class UserInDB(User):
+    hashed_password: str
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def get_user(username: str):
+    if username == settings.auth.username:
+        return UserInDB(
+            username=username,
+            hashed_password=get_password_hash(settings.auth.password) if not settings.auth.hashed_password else settings.auth.hashed_password,
+            disabled=False
+        )
+    return None
+
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.auth.token_expire_minutes)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.auth.secret_key, algorithm="HS256")
+    return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.auth.secret_key, algorithms=["HS256"])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user(username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+================
+File: src/api/models/requests.py
+================
+# src/api/models/requests.py
+from typing import Optional, Dict, Any
+from pydantic import BaseModel, Field
+
+class QueryRequest(BaseModel):
+    query: str = Field(..., description="The question to ask", min_length=1)
+    filters: Optional[Dict[str, Any]] = Field(None, description="Filters for retrieval")
+    model_name: Optional[str] = Field(None, description="The model to use for generation")
+    doc_id: Optional[str] = Field(None, description="Optional document ID to filter by")
+    chat_history_id: Optional[str] = Field(None, description="Optional chat history ID for context")
+
+class ModelSwitchRequest(BaseModel):
+    model_name: str = Field(..., description="The name of the model to switch to")
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., description="Username")
+    password: str = Field(..., description="Password")
+
+================
+File: src/api/models/responses.py
+================
+# src/api/models/responses.py
+from typing import List, Dict, Any
+from pydantic import BaseModel, Field
+from src.core.ollama_client import ModelInfo
+
+class QueryResponse(BaseModel):
+    response: str = Field(..., description="The generated response")
+    sources: List[str] = Field(..., description="Sources used in generating the response")
+    chat_history_id: str = Field(..., description="ID of the chat history")
+
+class ModelListResponse(BaseModel):
+    models: List[ModelInfo]
+
+class ModelSwitchResponse(BaseModel):
+    status: str = Field("success", description="Status of the model switch operation")
+    current_model: str = Field(..., description="The currently active model")
+
+class DocumentUploadResponse(BaseModel):
+    message: str
+    num_processed: int
+    document_ids: List[str]
+
+class DocumentInfo(BaseModel):
+    source: str = Field(..., description="Original document path")
+    file_type: str = Field(..., description="Document type/extension")
+    file_name: str = Field(..., description="Original file name")
+    chunk_count: int = Field(..., description="Number of chunks from this document")
+    added_at: str = Field(..., description="Timestamp when document was added")
+    doc_id: str = Field(..., description="Unique document ID")
+
+class DocumentListResponse(BaseModel):
+    documents: List[DocumentInfo] = Field(..., description="List of documents")
+    total_documents: int = Field(..., description="Total number of unique documents")
+    total_chunks: int = Field(..., description="Total number of chunks across all documents")
+
+class ErrorResponse(BaseModel):
+    detail: str = Field(..., description="Error message")
+    status_code: int = Field(..., description="HTTP status code")
+    error_type: str = Field(..., description="Type of error")
+
+================
+File: src/api/routers/auth.py
+================
+# src/api/routers/auth.py
+from datetime import timedelta
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from src.api.models.auth import Token, User, authenticate_user, create_access_token, get_current_active_user
+from src.core.config import settings
+from src.core.exceptions import AuthenticationError
+import logging
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
+
+@router.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    OAuth2 compatible token login, get an access token for future requests.
+    """
+    if not settings.auth.enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Authentication is disabled"
+        )
+    
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        logger.warning(f"Failed login attempt for user: {form_data.username}")
+        raise AuthenticationError("Incorrect username or password")
+    
+    access_token_expires = timedelta(minutes=settings.auth.token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    
+    logger.info(f"User {form_data.username} successfully logged in")
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/users/me", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    """
+    Get current user information.
+    """
+    return current_user
+
+@router.get("/status")
+async def auth_status():
+    """
+    Get authentication status.
+    """
+    return {
+        "enabled": settings.auth.enabled,
+        "token_expire_minutes": settings.auth.token_expire_minutes
+    }
+
+================
+File: src/api/routers/system.py
+================
+# src/api/routers/system.py
+from fastapi import APIRouter, HTTPException, Depends, Security
+from typing import List, Dict
+import logging
+from src.core.ollama_client import OllamaClient, ModelInfo
+from src.core.text_generation import TextGenerationService
+from src.api.dependencies import get_ollama_client, get_text_gen_service, get_auth_dependency
+from src.core.exceptions import ModelNotFoundError
+from src.api.models.responses import ModelListResponse, ModelSwitchResponse
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
+
+@router.get("/models", response_model=ModelListResponse)
+async def list_models(ollama_client: OllamaClient = Depends(get_ollama_client)):
+    """Lists available models from Ollama."""
+    try:
+        models = await ollama_client.list_models()
+        logger.info(f"Listed {len(models)} models")
+        return ModelListResponse(models=models)
+    except Exception as e:
+        logger.error(f"Error listing models: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/models/{model_name}", response_model=ModelSwitchResponse, dependencies=[Depends(get_auth_dependency())])
+async def switch_model(model_name: str, text_gen: TextGenerationService = Depends(get_text_gen_service)) -> Dict[str, str]:
+    """Switches to the specified model."""
+    try:
+        await text_gen.set_model(model_name)
+        logger.info(f"Switched to model: {model_name}")
+        return ModelSwitchResponse(current_model=model_name)
+    except ModelNotFoundError:
+        logger.warning(f"Model not found: {model_name}")
+        raise
+    except Exception as e:
+        logger.error(f"Error switching model: {e}", exc_info=True)
+        raise
+
+@router.get("/models/current", response_model=Dict[str, str])
+async def get_current_model(text_gen: TextGenerationService = Depends(get_text_gen_service)) -> Dict[str, str]:
+    """Returns the currently selected model."""
+    return {"current_model": text_gen.current_model}
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "ok"}
+
+@router.get("/info")
+async def system_info():
+    """System information endpoint."""
+    import platform
+    import sys
+    
+    return {
+        "system": {
+            "os": platform.system(),
+            "python_version": sys.version,
+            "platform": platform.platform()
+        },
+        "app": {
+            "auth_enabled": get_auth_dependency() is not None
+        }
+    }
+
+================
+File: src/api/routers/web.py
+================
+# src/api/routers/web.py
+from fastapi import APIRouter, Request, Depends, HTTPException, Form, status, Cookie
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.security import OAuth2PasswordRequestForm
+from typing import Optional, List, Dict, Any
+import os
+import logging
+from pathlib import Path
+from datetime import datetime
+
+from src.core.config import settings
+from src.api.models.auth import authenticate_user, create_access_token, get_current_active_user, User
+from src.rag.vector_store import VectorStoreManager
+from src.api.dependencies import get_vector_store, get_current_user_optional
+
+logger = logging.getLogger(__name__)
+
+# Setup templates
+templates_path = Path(__file__).parent.parent.parent.parent / "frontend" / "templates"
+templates = Jinja2Templates(directory=str(templates_path))
+
+router = APIRouter()
+
+# Home page
+@router.get("/", response_class=HTMLResponse)
+async def home(
+    request: Request, 
+    access_token: Optional[str] = Cookie(None),
+    user: Optional[User] = Depends(get_current_user_optional)
+):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "user": user}
+    )
+
+# Login page
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(
+    request: Request, 
+    access_token: Optional[str] = Cookie(None),
+    user: Optional[User] = Depends(get_current_user_optional)
+):
+    if user:
+        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse(
+        "login.html",
+        {"request": request, "user": None}
+    )
+
+# Login form submission
+@router.post("/login")
+async def login(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends()
+):
+    if not settings.auth.enabled:
+        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "user": None,
+                "messages": [{"type": "danger", "text": "Invalid username or password"}]
+            }
+        )
+    
+    access_token = create_access_token(data={"sub": user.username})
+    
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        max_age=settings.auth.token_expire_minutes * 60,
+        samesite="lax"
+    )
+    
+    return response
+
+# Logout
+@router.get("/logout")
+async def logout():
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    response.delete_cookie(key="access_token")
+    return response
+
+# Documents page
+@router.get("/documents", response_class=HTMLResponse)
+async def documents_page(
+    request: Request,
+    access_token: Optional[str] = Cookie(None),
+    user: Optional[User] = Depends(get_current_user_optional),
+    vector_store: VectorStoreManager = Depends(get_vector_store)
+):
+    if settings.auth.enabled and not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse(
+        "documents.html",
+        {"request": request, "user": user}
+    )
+
+# Chat page
+@router.get("/chat", response_class=HTMLResponse)
+async def chat_page(
+    request: Request,
+    doc_id: Optional[str] = None,
+    access_token: Optional[str] = Cookie(None),
+    user: Optional[User] = Depends(get_current_user_optional)
+):
+    if settings.auth.enabled and not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse(
+        "chat.html",
+        {"request": request, "user": user, "doc_id": doc_id}
+    )
+
+# Stats page
+@router.get("/stats", response_class=HTMLResponse)
+async def stats_page(
+    request: Request,
+    access_token: Optional[str] = Cookie(None),
+    user: Optional[User] = Depends(get_current_user_optional),
+    vector_store: VectorStoreManager = Depends(get_vector_store)
+):
+    if settings.auth.enabled and not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    try:
+        stats = {
+            "vector_store": vector_store.get_collection_stats(),
+            "uploads_dir": Path(settings.uploads_dir),
+            "chat_histories_dir": Path(settings.chat_histories_dir)
+        }
+        
+        # Count files in uploads directory
+        uploads_count = len(list(Path(settings.uploads_dir).glob("*")))
+        
+        # Count files in chat_histories directory
+        chat_histories_count = len(list(Path(settings.chat_histories_dir).glob("*.json")))
+        
+        return templates.TemplateResponse(
+            "stats.html",
+            {
+                "request": request, 
+                "user": user, 
+                "stats": stats,
+                "uploads_count": uploads_count,
+                "chat_histories_count": chat_histories_count
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error getting stats: {e}", exc_info=True)
+        return templates.TemplateResponse(
+            "error.html",
+            {
+                "request": request,
+                "user": user,
+                "error": "Error retrieving system statistics"
+            }
+        )
+
+================
+File: src/api/dependencies.py
+================
+# src/api/dependencies.py
+from fastapi import Depends, Security
+from src.core.text_generation import TextGenerationService
+from src.core.ollama_client import OllamaClient
+from src.core.config import settings
+from src.api.models.auth import get_current_active_user, User
+
+async def get_ollama_client() -> OllamaClient:
+    client = OllamaClient()
+    try:
+        yield client
+    finally:
+        await client.close()
+
+async def get_text_gen_service(
+    ollama_client: OllamaClient = Depends(get_ollama_client)
+) -> TextGenerationService:
+    return TextGenerationService(ollama_client)
+
+def get_auth_dependency():
+    """Returns the appropriate dependency based on whether auth is enabled."""
+    if settings.auth.enabled:
+        return Security(get_current_active_user)
+    return None
+
+async def get_current_user_optional(token: str = None) -> User:
+    """Get current user if authenticated, otherwise return None."""
+    if not settings.auth.enabled:
+        # If auth is disabled, return a default user
+        return User(username="Guest", disabled=False)
+    
+    if not token:
+        return None
+    
+    try:
+        from src.api.models.auth import get_current_user
+        user = await get_current_user(token)
+        return user
+    except:
+        return None
+
+================
+File: src/api/error_handlers.py
+================
+# src/api/error_handlers.py
+import logging
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from src.core.exceptions import (
+    BaseAppException,
+    ModelError,
+    ModelNotFoundError,
+    ModelSwitchError,
+    DocumentProcessingError,
+    VectorStoreError,
+    QueryError,
+    AuthenticationError
+)
+
+logger = logging.getLogger(__name__)
+
+def register_exception_handlers(app: FastAPI):
+    """Register custom exception handlers for the application."""
+    
+    @app.exception_handler(ModelNotFoundError)
+    async def model_not_found_exception_handler(request: Request, exc: ModelNotFoundError):
+        logger.warning(f"Model not found: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_404_NOT_FOUND,
+                "error_type": "ModelNotFoundError"
+            },
+        )
+    
+    @app.exception_handler(ModelSwitchError)
+    async def model_switch_exception_handler(request: Request, exc: ModelSwitchError):
+        logger.error(f"Model switch error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "error_type": "ModelSwitchError"
+            },
+        )
+    
+    @app.exception_handler(ModelError)
+    async def model_exception_handler(request: Request, exc: ModelError):
+        logger.error(f"Model error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "error_type": "ModelError"
+            },
+        )
+    
+    @app.exception_handler(DocumentProcessingError)
+    async def document_processing_exception_handler(request: Request, exc: DocumentProcessingError):
+        logger.error(f"Document processing error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_400_BAD_REQUEST,
+                "error_type": "DocumentProcessingError"
+            },
+        )
+    
+    @app.exception_handler(VectorStoreError)
+    async def vector_store_exception_handler(request: Request, exc: VectorStoreError):
+        logger.error(f"Vector store error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "error_type": "VectorStoreError"
+            },
+        )
+    
+    @app.exception_handler(QueryError)
+    async def query_exception_handler(request: Request, exc: QueryError):
+        logger.error(f"Query error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_400_BAD_REQUEST,
+                "error_type": "QueryError"
+            },
+        )
+    
+    @app.exception_handler(AuthenticationError)
+    async def authentication_exception_handler(request: Request, exc: AuthenticationError):
+        logger.warning(f"Authentication error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_401_UNAUTHORIZED,
+                "error_type": "AuthenticationError"
+            },
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    @app.exception_handler(BaseAppException)
+    async def base_app_exception_handler(request: Request, exc: BaseAppException):
+        logger.error(f"Application error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "detail": str(exc),
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "error_type": exc.__class__.__name__
+            },
+        )
+    
+    @app.exception_handler(Exception)
+    async def general_exception_handler(request: Request, exc: Exception):
+        logger.exception(f"Unhandled exception: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "detail": "An unexpected error occurred. Please check the logs for details.",
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "error_type": "UnhandledException"
+            },
+        )
+
+================
+File: src/core/config.py
+================
+# src/core/config.py
+from pydantic import BaseSettings, Field
+from typing import Optional
+
+class OllamaSettings(BaseSettings):
+    base_url: str = Field("http://localhost:11434", env="OLLAMA_BASE_URL")
+    default_model: str = Field("llama2", env="RAG_LLM_MODEL")
+    default_embedding_model: str = Field("nomic-embed-text", env="RAG_EMBEDDING_MODEL")
+    max_retries: int = Field(3, env="RAG_OLLAMA_MAX_RETRIES")
+    retry_delay: int = Field(1, env="RAG_OLLAMA_RETRY_DELAY")
+
+class AuthSettings(BaseSettings):
+    enabled: bool = Field(False, env="AUTH_ENABLED")
+    secret_key: str = Field("default-secret-key-change-in-production", env="AUTH_SECRET_KEY")
+    token_expire_minutes: int = Field(60, env="AUTH_TOKEN_EXPIRE_MINUTES")
+    username: str = Field("admin", env="AUTH_USERNAME")
+    password: str = Field("password", env="AUTH_PASSWORD")
+    hashed_password: Optional[str] = Field(None, env="AUTH_HASHED_PASSWORD")
+
+class Settings(BaseSettings):
+    ollama: OllamaSettings = OllamaSettings()
+    auth: AuthSettings = AuthSettings()
+    uploads_dir: str = Field("uploads", env="RAG_UPLOADS_DIR")
+    chroma_db_path: str = Field("chroma_db", env="RAG_CHROMA_DB_PATH")
+    chat_histories_dir: str = Field("chat_histories", env="RAG_CHAT_HISTORIES_DIR")
+    api_host: str = Field("0.0.0.0", env="RAG_API_HOST")
+    api_port: int = Field(8002, env="RAG_API_PORT")
+    log_level: str = Field("INFO", env="LOG_LEVEL")
+    log_file: Optional[str] = Field(None, env="LOG_FILE")
+
+settings = Settings()
+
+================
+File: src/core/exceptions.py
+================
+# src/core/exceptions.py
+
+class BaseAppException(Exception):
+    """Base exception for all application exceptions."""
+    pass
+
+class ModelError(BaseAppException):
+    """Base exception for model-related errors."""
+    pass
+
+class ModelNotFoundError(ModelError):
+    """Raised when specified model is not available."""
+    pass
+
+class ModelSwitchError(ModelError):
+    """Raised when model switch operation fails."""
+    pass
+
+class DocumentProcessingError(BaseAppException):
+    """Raised when document processing fails."""
+    pass
+
+class VectorStoreError(BaseAppException):
+    """Base exception for vector store related errors."""
+    pass
+
+class QueryError(BaseAppException):
+    """Raised when query processing fails."""
+    pass
+
+class AuthenticationError(BaseAppException):
+    """Raised for authentication related errors."""
+    pass
+
+================
+File: src/core/logging_config.py
+================
+# src/core/logging_config.py
+import logging
+import sys
+from pathlib import Path
+from logging.handlers import RotatingFileHandler
+from src.core.config import settings
+
+def setup_logging():
+    """Configure logging for the application."""
+    log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    
+    # Clear existing handlers
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    
+    # Console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(log_level)
+    root_logger.addHandler(console_handler)
+    
+    # File handler (if configured)
+    if settings.log_file:
+        log_file_path = Path(settings.log_file)
+        log_file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        file_handler = RotatingFileHandler(
+            log_file_path,
+            maxBytes=10 * 1024 * 1024,  # 10 MB
+            backupCount=5
+        )
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(log_level)
+        root_logger.addHandler(file_handler)
+    
+    # Set specific loggers to different levels if needed
+    logging.getLogger("uvicorn").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    
+    logging.info(f"Logging configured with level: {settings.log_level}")
+
+================
+File: src/core/ollama_client.py
+================
+# src/core/ollama_client.py
+import httpx
+import logging
+from typing import List, Dict, Any
+from pydantic import BaseModel, ValidationError, Field
+from src.core.config import settings  # Import settings
+
+logger = logging.getLogger(__name__)
+
+class ModelInfo(BaseModel):
+    name: str
+    model: str
+    modified_at: str
+    size: int
+    digest: str
+    details: Dict[str, Any] = Field(default_factory=dict)
+
+class OllamaClient:
+    def __init__(self):
+        self.base_url = settings.ollama.base_url
+        self.client = httpx.AsyncClient()
+        logger.info(f"Initialized OllamaClient with base URL: {self.base_url}")
+
+    async def list_models(self) -> List[ModelInfo]:
+        """Fetches available models from Ollama API."""
+        try:
+            response = await self.client.get(f"{self.base_url}/api/tags")
+            response.raise_for_status()
+            data = response.json()
+            models = [
+                ModelInfo(
+                    name=model.get("name", ""),
+                    model=model.get("model", ""),
+                    modified_at=model.get("modified_at", ""),
+                    size=model.get("size", 0),
+                    digest=model.get("digest", ""),
+                    details=model.get("details", {}),
+                )
+                for model in data.get("models", [])
+            ]
+            logger.info(f"Retrieved {len(models)} models from Ollama")
+            return models
+        except httpx.RequestError as e:
+            logger.error(f"Error fetching models from Ollama: {e}", exc_info=True)
+            raise
+        except ValidationError as e:
+            logger.error(f"Error parsing Ollama response: {e}", exc_info=True)
+            raise
+        except Exception as e:
+            logger.exception(f"An unexpected error occurred: {e}")
+            raise
+
+    async def close(self):
+        await self.client.aclose()
+        logger.info("OllamaClient connection closed")
+
+================
+File: src/core/text_generation.py
+================
+# src/core/text_generation.py
+from langchain_ollama import OllamaLLM
+import logging
+from typing import Optional, List
+from .ollama_client import OllamaClient
+from .config import settings
+from .exceptions import ModelNotFoundError
+
+logger = logging.getLogger(__name__)
+
+class TextGenerationService:
+    def __init__(self, ollama_client: OllamaClient):
+        self.ollama_client = ollama_client
+        self.current_model = settings.ollama.default_model
+        self._initialize_llm()
+        logger.info(f"Initialized TextGenerationService with model: {self.current_model}")
+
+    def _initialize_llm(self, model_name: Optional[str] = None):
+        """Initializes or re-initializes the OllamaLLM object."""
+        model_to_use = model_name or self.current_model
+        try:
+            self.llm = OllamaLLM(
+                model=model_to_use,
+                base_url=settings.ollama.base_url
+            )
+            logger.info(f"Initialized LLM with model: {model_to_use}")
+        except Exception as e:
+            logger.error(f"Failed to initialize LLM with model {model_to_use}: {e}", exc_info=True)
+            raise
+
+    async def set_model(self, model_name: str) -> bool:
+        """Switch to a different model."""
+        models = await self.ollama_client.list_models()
+        if not any(m.name == model_name for m in models):
+            logger.error(f"Model {model_name} not found in available models")
+            raise ModelNotFoundError(f"Model {model_name} not available")
+
+        try:
+            self._initialize_llm(model_name=model_name)
+            self.current_model = model_name
+            logger.info(f"Successfully switched to model: {model_name}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to switch to model {model_name}: {e}", exc_info=True)
+            raise
+
+    async def generate_text(self, prompt: List, model_name: Optional[str] = None) -> str:
+        """Generate text using specified or current model."""
+        if model_name and model_name != self.current_model:
+            await self.set_model(model_name)
+
+        try:
+            response = self.llm.invoke(prompt)
+            return response.content
+        except Exception as e:
+            logger.error(f"Error generating text with model {self.current_model}: {e}", exc_info=True)
+            raise
+
+================
+File: src/rag/document_processor.py
+================
+# src/rag/document_processor.py
+from typing import List, Optional, Dict, Any
+from pathlib import Path
+import logging
+from datetime import datetime
+import time
+import hashlib
+import os
+
+from langchain_community.document_loaders import (
+    DirectoryLoader,
+    UnstructuredFileLoader,
+    TextLoader,
+    PDFMinerLoader
+)
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+from src.core.exceptions import DocumentProcessingError
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+class DocumentProcessor:
+    """Handles document loading and preprocessing for RAG applications."""
+
+    def __init__(
+        self,
+        chunk_size: int = 500,
+        chunk_overlap: int = 100,
+        supported_formats: Optional[List[str]] = None
+    ):
+        """
+        Initialize the document processor.
+
+        Args:
+            chunk_size: Size of text chunks.
+            chunk_overlap: Overlap between chunks.
+            supported_formats: List of supported file extensions.
+        """
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.supported_formats = supported_formats or ['.txt', '.pdf', '.docx']
+
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            length_function=len,
+            separators=["\n\n", "\n", ".", "!", "?", ",", " "],
+            is_separator_regex=False
+        )
+
+        self.loader_map = {
+            '.txt': TextLoader,
+            '.pdf': PDFMinerLoader,
+            '.docx': UnstructuredFileLoader,
+        }
+        
+        logger.info(f"Initialized DocumentProcessor with chunk_size={chunk_size}, chunk_overlap={chunk_overlap}")
+        logger.info(f"Supported formats: {self.supported_formats}")
+
+    def _validate_file(self, file_path: Path) -> bool:
+        """Validates if a file is supported and exists."""
+        if not file_path.exists():
+            logger.warning(f"File does not exist: {file_path}")
+            return False
+
+        if file_path.suffix.lower() not in self.supported_formats:
+            logger.warning(f"Unsupported file format: {file_path.suffix}")
+            return False
+
+        return True
+
+    def _get_loader_for_file(self, file_path: Path) -> Optional[Any]:
+        """Gets the appropriate loader for a file type."""
+        return self.loader_map.get(file_path.suffix.lower())
+
+    def _extract_section_info(self, text: str) -> Dict[str, Any]:
+        """Extracts section information from text."""
+        section_info = {
+            "heading_level": 0,
+            "section_name": "",
+            "is_section_start": False
+        }
+        lines = text.split('\n')
+        for line in lines[:2]:
+            if line.startswith('#'):
+                section_info["heading_level"] = line.count('#')
+                section_info["section_name"] = line.strip('# ')
+                section_info["is_section_start"] = True
+                break
+        return section_info
+
+    def process_single_document(self, file_path: str) -> List[Document]:
+        """Processes a single document file."""
+        file_path = Path(file_path)
+        try:
+            if not self._validate_file(file_path):
+                raise DocumentProcessingError(f"Invalid file: {file_path}")
+
+            loader_class = self._get_loader_for_file(file_path)
+            if not loader_class:
+                raise DocumentProcessingError(f"No loader available for: {file_path}")
+
+            logger.info(f"Processing document: {file_path}")
+            loader = loader_class(str(file_path))
+            documents = loader.load()
+
+            processed_chunks = []
+            chunk_index = 0
+
+            # Generate a unique document ID using a hash for better uniqueness
+            doc_id = hashlib.sha256(f"{file_path}{time.time()}".encode()).hexdigest()
+
+            for doc in documents:
+                doc.metadata.update({
+                    "source": str(file_path),
+                    "file_type": file_path.suffix,
+                    "file_name": file_path.name,
+                    "doc_id": doc_id,  # Add the unique document ID
+                    "processed_at": datetime.now().isoformat()
+                })
+
+                chunks = self.text_splitter.split_documents([doc])
+
+                for chunk in chunks:
+                    section_info = self._extract_section_info(chunk.page_content)
+                    chunk.metadata.update({
+                        "doc_id": doc_id,  # Add doc_id to each chunk
+                        "chunk_index": chunk_index,
+                        "total_chunks": len(chunks),
+                        "chunk_size": len(chunk.page_content),
+                        "section_info": section_info,
+                        "is_section_start": section_info["is_section_start"]
+                    })
+                    processed_chunks.append(chunk)
+                    chunk_index += 1
+
+            logger.info(f"Processed {file_path}: {len(processed_chunks)} chunks created, doc_id: {doc_id}")
+            return processed_chunks
+
+        except DocumentProcessingError as e:
+            logger.error(f"Error processing document {file_path}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error processing document {file_path}: {e}", exc_info=True)
+            raise DocumentProcessingError(f"Failed to process document {file_path}: {str(e)}")
+
+    def process_directory(self, directory_path: str) -> List[Document]:
+        """Processes all supported documents in a directory."""
+        directory_path = Path(directory_path)
+        if not directory_path.is_dir():
+            raise DocumentProcessingError(f"Invalid directory path: {directory_path}")
+
+        logger.info(f"Processing directory: {directory_path}")
+        all_chunks = []
+        processed_files = 0
+        failed_files = 0
+        
+        for file_path in directory_path.rglob("*"):
+            if file_path.is_file() and file_path.suffix.lower() in self.supported_formats:
+                try:
+                    chunks = self.process_single_document(str(file_path))
+                    all_chunks.extend(chunks)
+                    processed_files += 1
+                except Exception as e:
+                    logger.error(f"Error processing {file_path}: {e}")
+                    failed_files += 1
+                    continue  # Continue processing other files
+
+        logger.info(f"Processed directory {directory_path}: {len(all_chunks)} total chunks created")
+        logger.info(f"Successfully processed {processed_files} files, failed to process {failed_files} files")
+        return all_chunks
+
+    def get_document_metadata(self, chunks: List[Document]) -> Dict[str, Any]:
+        """Gets metadata about processed documents."""
+        unique_sources = set(chunk.metadata.get("source") for chunk in chunks)
+        unique_doc_ids = set(chunk.metadata.get("doc_id") for chunk in chunks)
+        
+        stats = {
+            "total_chunks": len(chunks),
+            "unique_sources": len(unique_sources),
+            "unique_documents": len(unique_doc_ids),
+            "avg_chunk_size": sum(len(chunk.page_content) for chunk in chunks) / len(chunks) if chunks else 0,
+            "sources": list(unique_sources),
+            "chunk_size_distribution": {
+                "min": min(len(chunk.page_content) for chunk in chunks) if chunks else 0,
+                "max": max(len(chunk.page_content) for chunk in chunks) if chunks else 0
+            },
+            "section_starts": sum(1 for chunk in chunks if chunk.metadata.get("is_section_start", False))
+        }
+        return stats
+
+================
+File: src/rag/query_engine.py
+================
+# src/rag/query_engine.py
+import logging
+import json
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+from pathlib import Path
+
+from .vector_store import VectorStoreManager
+from src.core.text_generation import TextGenerationService
+from src.core.config import settings
+from src.core.exceptions import QueryError
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+logger = logging.getLogger(__name__)
+
+class RAGQueryEngine:
+    def __init__(self, vector_store: VectorStoreManager, text_generation_service: TextGenerationService):
+        self.vector_store = vector_store
+        self.text_generation_service = text_generation_service
+        self._initialize_prompt_template()
+        self.chat_histories_dir = Path(settings.chat_histories_dir)
+        self.chat_histories_dir.mkdir(parents=True, exist_ok=True)
+        logger.info("Initialized RAGQueryEngine with TextGenerationService")
+
+    def _initialize_prompt_template(self):
+        """Initializes the chat prompt template."""
+        self.prompt_template = ChatPromptTemplate.from_messages([
+            ("system", "You are a helpful AI assistant that answers questions based on the provided context. "
+                       "If the context doesn't contain relevant information, say you don't know. "
+                       "Always cite your sources by referring to the document names."),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("user", "Context:\n{context}\n\nQuestion:\n{question}")
+        ])
+        logger.info("Initialized prompt template")
+
+    async def generate_response(
+        self,
+        query: str,
+        chat_history_id: Optional[str] = None,
+        chat_history: Optional[List[Dict[str, Any]]] = None,
+        filter_dict: Optional[Dict[str, Any]] = None,
+        k_documents: int = 6,
+        model_name: Optional[str] = None,
+        doc_id: Optional[str] = None
+    ) -> str:
+        """Generates a response using RAG with optional model selection."""
+        try:
+            # --- Combine filter_dict and doc_id filter ---
+            final_filter = {}
+            if filter_dict:
+                final_filter.update(filter_dict)
+            if doc_id:
+                final_filter["doc_id"] = doc_id
+
+            # Retrieve relevant documents
+            relevant_docs = self.vector_store.similarity_search(
+                query,
+                k=k_documents,
+                filter_dict=final_filter if final_filter else None
+            )
+
+            if not relevant_docs:
+                logger.warning(f"No relevant documents found for query: {query}")
+                return "I couldn't find any relevant information to answer your question."
+
+            # Format the context
+            context = self._format_context(relevant_docs)
+            
+            # Load chat history if provided
+            history_messages = []
+            if chat_history_id:
+                history_messages = self._load_chat_history(chat_history_id)
+            elif chat_history:
+                history_messages = chat_history
+
+            # Format the prompt
+            formatted_prompt = self.prompt_template.format_messages(
+                context=context,
+                question=query,
+                chat_history=history_messages
+            )
+
+            # Generate the response
+            response = await self.text_generation_service.generate_text(
+                prompt=formatted_prompt,
+                model_name=model_name
+            )
+
+            # Save chat history if chat_history_id is provided
+            if chat_history_id:
+                self._save_chat_history(
+                    chat_history_id,
+                    query,
+                    response,
+                    history_messages
+                )
+
+            # Extract sources for the response
+            sources = self._extract_sources(relevant_docs)
+            
+            logger.info(f"Generated response using model: {model_name or self.text_generation_service.current_model}")
+            return response
+
+        except Exception as e:
+            logger.error(f"Error in generate_response: {e}", exc_info=True)
+            raise QueryError(f"Failed to generate response: {str(e)}")
+
+    def _format_context(self, documents: List[Any]) -> str:
+        """Formats the retrieved documents into a context string."""
+        context_parts = []
+        for i, doc in enumerate(documents, 1):
+            source = doc.metadata.get("source", "Unknown source")
+            file_name = doc.metadata.get("file_name", "Unknown file")
+            context_parts.append(f"[Document {i} from {file_name}]\n{doc.page_content}")
+        
+        return "\n\n".join(context_parts)
+
+    def _extract_sources(self, documents: List[Any]) -> List[str]:
+        """Extracts source information from documents."""
+        sources = []
+        for doc in documents:
+            source = doc.metadata.get("source", "Unknown source")
+            if source not in sources:
+                sources.append(source)
+        return sources
+
+    def _load_chat_history(self, chat_history_id: str) -> List[Dict[str, Any]]:
+        """Loads chat history from file."""
+        try:
+            history_file = self.chat_histories_dir / f"{chat_history_id}.json"
+            if not history_file.exists():
+                logger.info(f"No chat history found for ID: {chat_history_id}")
+                return []
+            
+            with open(history_file, 'r') as f:
+                history_data = json.load(f)
+            
+            # Convert to format expected by prompt template
+            messages = []
+            for entry in history_data:
+                if entry["role"] == "user":
+                    messages.append(("user", entry["content"]))
+                elif entry["role"] == "assistant":
+                    messages.append(("assistant", entry["content"]))
+            
+            logger.info(f"Loaded chat history for ID: {chat_history_id}, {len(messages)} messages")
+            return messages
+        except Exception as e:
+            logger.error(f"Error loading chat history: {e}", exc_info=True)
+            return []
+
+    def _save_chat_history(
+        self,
+        chat_history_id: str,
+        query: str,
+        response: str,
+        previous_history: List[Dict[str, Any]]
+    ) -> None:
+        """Saves chat history to file."""
+        try:
+            history_file = self.chat_histories_dir / f"{chat_history_id}.json"
+            
+            # Convert previous history to serializable format
+            history_data = []
+            for entry in previous_history:
+                if isinstance(entry, tuple) and len(entry) == 2:
+                    role, content = entry
+                    history_data.append({"role": role, "content": content})
+                elif isinstance(entry, dict) and "role" in entry and "content" in entry:
+                    history_data.append(entry)
+            
+            # Add new messages
+            history_data.append({"role": "user", "content": query})
+            history_data.append({"role": "assistant", "content": response})
+            
+            # Save to file
+            with open(history_file, 'w') as f:
+                json.dump(history_data, f, indent=2)
+            
+            logger.info(f"Saved chat history for ID: {chat_history_id}")
+        except Exception as e:
+            logger.error(f"Error saving chat history: {e}", exc_info=True)
+
+================
+File: src/rag/vector_store.py
+================
+# src/rag/vector_store.py
+from typing import List, Optional, Dict, Any
+import logging
+from pathlib import Path
+import shutil
+import os
+import time
+
+from langchain_core.documents import Document
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_chroma import Chroma
+from dotenv import load_dotenv
+from src.core.config import settings
+from src.core.exceptions import VectorStoreError
+
+# Load environment variables
+load_dotenv()
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+class VectorStoreManager:
+    """Manages vector storage and retrieval operations for RAG applications."""
+
+    def __init__(
+        self,
+        persist_directory: str,
+        collection_name: str = "rag_documents",
+        distance_metric: str = "cosine"
+    ):
+        """
+        Initialize the vector store manager.
+
+        Args:
+            persist_directory: Directory to persist vector store.
+            collection_name: Name of the Chroma collection.
+            distance_metric: Metric for similarity search.
+        """
+        self.persist_directory = Path(persist_directory)
+        self.collection_name = collection_name
+        self.distance_metric = distance_metric
+        self._initialize_embeddings()
+        self._initialize_vector_store()
+        logger.info(f"Initialized VectorStoreManager with persist_directory={persist_directory}, collection_name={collection_name}")
+
+    def _initialize_embeddings(self):
+        """Initialize embedding function with Sentence Transformers."""
+        try:
+            self.embedding_function = SentenceTransformerEmbeddings(
+                model_name=settings.ollama.default_embedding_model
+            )
+            logger.info(f"Initialized embedding model: {settings.ollama.default_embedding_model}")
+        except Exception as e:
+            logger.error(f"Failed to initialize embedding model: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to initialize embedding model: {str(e)}")
+
+    def _initialize_vector_store(self):
+        """Initialize or load existing vector store."""
+        try:
+            if self.persist_directory.exists():
+                self.vector_store = Chroma(
+                    persist_directory=str(self.persist_directory),
+                    embedding_function=self.embedding_function,
+                    collection_name=self.collection_name
+                )
+                logger.info(f"Loaded existing vector store from {self.persist_directory}")
+            else:
+                self.persist_directory.mkdir(parents=True, exist_ok=True)
+                self.vector_store = Chroma(
+                    persist_directory=str(self.persist_directory),
+                    embedding_function=self.embedding_function,
+                    collection_name=self.collection_name
+                )
+                logger.info(f"Created new vector store at {self.persist_directory}")
+        except Exception as e:
+            logger.error(f"Error initializing vector store: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to initialize vector store: {str(e)}")
+
+    def add_documents(self, documents: List[Document], batch_size: int = 100) -> None:
+        """Adds documents to the vector store, handling metadata."""
+        if not documents:
+            logger.warning("No documents provided to add_documents")
+            return
+            
+        try:
+            filtered_documents = []
+            for doc in documents:
+                filtered_metadata = {}
+                for key, value in doc.metadata.items():
+                    if isinstance(value, (str, int, float, bool)):
+                        filtered_metadata[key] = value
+                    elif value is None:
+                        filtered_metadata[key] = value
+                    else:
+                        try:
+                            filtered_metadata[key] = str(value)
+                        except Exception:
+                            logger.warning(f"Skipping complex metadata field: {key}")
+
+                filtered_doc = Document(
+                    page_content=doc.page_content,
+                    metadata=filtered_metadata
+                )
+                filtered_documents.append(filtered_doc)
+
+            total_batches = (len(filtered_documents) + batch_size - 1) // batch_size
+            logger.info(f"Adding {len(filtered_documents)} documents in {total_batches} batches")
+            
+            for i in range(0, len(filtered_documents), batch_size):
+                batch = filtered_documents[i:i + batch_size]
+                self.vector_store.add_documents(batch)
+                batch_num = (i // batch_size) + 1
+                logger.info(f"Added batch {batch_num}/{total_batches} of {len(batch)} documents to vector store")
+
+            logger.info(f"Successfully added {len(documents)} documents to vector store")
+
+        except Exception as e:
+            logger.error(f"Error adding documents to vector store: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to add documents to vector store: {str(e)}")
+
+    def similarity_search(
+        self,
+        query: str,
+        k: int = 4,
+        filter_dict: Optional[Dict[str, Any]] = None
+    ) -> List[Document]:
+        """Performs similarity search."""
+        try:
+            where = {"$and": [filter_dict]} if filter_dict else None
+            logger.info(f"Performing similarity search for query: '{query[:50]}...' with k={k}, filter={where}")
+            
+            documents = self.vector_store.similarity_search(
+                query,
+                k=k,
+                filter=where
+            )
+            
+            logger.info(f"Found {len(documents)} documents for query")
+            return documents
+        except Exception as e:
+            logger.error(f"Error performing similarity search: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to perform similarity search: {str(e)}")
+
+    def get_collection_stats(self) -> Dict[str, Any]:
+        """Gets statistics about the vector store collection."""
+        try:
+            collection = self.vector_store._collection
+            count = collection.count()
+            stats = {
+                "total_documents": count,  # This is actually total *chunks*
+                "persist_directory": str(self.persist_directory),
+                "collection_name": self.collection_name,
+                "embedding_model": settings.ollama.default_embedding_model
+            }
+            logger.info(f"Retrieved collection stats: {count} total documents")
+            return stats
+        except Exception as e:
+            logger.error(f"Error getting collection stats: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to get collection stats: {str(e)}")
+
+    def clear_collection(self) -> None:
+        """Clears all documents from the vector store."""
+        try:
+            logger.warning("Clearing vector store collection")
+            if self.persist_directory.exists():
+                shutil.rmtree(self.persist_directory)
+            self._initialize_vector_store()
+            logger.info("Successfully cleared vector store collection")
+        except Exception as e:
+            logger.error(f"Error clearing vector store: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to clear vector store: {str(e)}")
+
+    def list_documents(self) -> List[Dict[str, Any]]:
+        """Gets a list of all documents in the vector store with metadata."""
+        try:
+            collection = self.vector_store._collection
+            documents = collection.get()
+
+            if not documents or not documents.get('documents'):
+                logger.info("No documents found in vector store")
+                return []
+
+            doc_groups = {}
+            for i, doc in enumerate(documents['documents']):
+                metadata = documents['metadatas'][i]
+                doc_id = metadata.get('doc_id', f"unknown_{i}")  # Use doc_id
+                source = metadata.get('source', 'Unknown source')
+
+                if doc_id not in doc_groups:
+                    doc_groups[doc_id] = {
+                        'source': source,
+                        'file_type': metadata.get('file_type', ''),
+                        'file_name': metadata.get('file_name', ''),
+                        'chunk_count': 1,
+                        'added_at': metadata.get('processed_at', ''),  # Use processed_at
+                        'doc_id': doc_id  # Include doc_id in the output
+                    }
+                else:
+                    doc_groups[doc_id]['chunk_count'] += 1
+
+            doc_list = list(doc_groups.values())
+            doc_list.sort(key=lambda x: x['source'])  # Sort by source
+
+            logger.info(f"Listed {len(doc_list)} documents from vector store")
+            return doc_list
+
+        except Exception as e:
+            logger.error(f"Error listing documents: {e}", exc_info=True)
+            raise VectorStoreError(f"Failed to list documents: {str(e)}")
+
+================
+File: src/main.py
+================
+# src/main.py
+import logging
+import os
+from pathlib import Path
+from datetime import datetime
+from typing import List, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks, Depends, Security
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+
+from src.core.config import settings
+from src.core.logging_config import setup_logging
+from src.rag.document_processor import DocumentProcessor
+from src.rag.vector_store import VectorStoreManager
+from src.rag.query_engine import RAGQueryEngine
+from src.api.routers import system, auth, web
+from src.api.error_handlers import register_exception_handlers
+from src.core.ollama_client import OllamaClient
+from src.core.text_generation import TextGenerationService
+from src.api.dependencies import get_ollama_client, get_text_gen_service, get_auth_dependency
+from src.api.models.requests import QueryRequest
+from src.api.models.responses import QueryResponse, DocumentListResponse, DocumentUploadResponse
+from src.core.exceptions import DocumentProcessingError, QueryError
+
+# Setup logging
+setup_logging()
+
+# Load environment variables
+load_dotenv()
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="Metis RAG API",
+    description="REST API for RAG-based document query system with authentication and model selection",
+    version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register exception handlers
+register_exception_handlers(app)
+
+# --- Use settings for paths ---
+UPLOAD_DIR = Path(settings.uploads_dir)
+VECTOR_STORE_DIR = Path(settings.chroma_db_path)
+CHAT_HISTORY_DIR = Path(settings.chat_histories_dir)
+
+# Ensure directories exist
+for directory in [UPLOAD_DIR, VECTOR_STORE_DIR, CHAT_HISTORY_DIR]:
+    directory.mkdir(parents=True, exist_ok=True)
+
+# --- Dependency Injection Setup ---
+@app.on_event("startup")
+async def startup_event():
+    """Initialize components on startup."""
+    logger.info("Starting application...")
+    app.state.ollama_client = OllamaClient()
+    app.state.text_generation_service = TextGenerationService(
+        ollama_client=app.state.ollama_client
+    )
+    app.state.document_processor = DocumentProcessor()
+    app.state.vector_store = VectorStoreManager(persist_directory=str(VECTOR_STORE_DIR))
+    app.state.query_engine = RAGQueryEngine(
+        vector_store=app.state.vector_store,
+        text_generation_service=app.state.text_generation_service
+    )
+    logger.info("Initialized application components")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown."""
+    logger.info("Shutting down application...")
+    await app.state.ollama_client.close()
+    logger.info("Closed OllamaClient connection")
+
+# Dependencies for endpoints
+def get_document_processor() -> DocumentProcessor:
+    return app.state.document_processor
+
+def get_vector_store() -> VectorStoreManager:
+    return app.state.vector_store
+
+def get_query_engine() -> RAGQueryEngine:
+    return app.state.query_engine
+
+# --- Include Routers ---
+app.include_router(system.router, prefix="/system", tags=["System"])
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+
+# Mount static files
+frontend_path = Path(__file__).parent.parent / "frontend"
+app.mount("/static", StaticFiles(directory=str(frontend_path / "static")), name="static")
+
+# Include web router
+app.include_router(web.router, tags=["Web UI"])
+
+# --- API Endpoints ---
+@app.post("/upload", response_model=DocumentUploadResponse, dependencies=[Depends(get_auth_dependency())])
+async def upload_documents(
+    background_tasks: BackgroundTasks,
+    files: List[UploadFile] = File(...),
+    document_processor: DocumentProcessor = Depends(get_document_processor),
+    vector_store: VectorStoreManager = Depends(get_vector_store)
+):
+    """Upload and process documents for RAG."""
+    try:
+        document_ids = []
+        for file in files:
+            file_path = UPLOAD_DIR / file.filename
+            with open(file_path, "wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+            document_ids.append(str(file_path))
+            background_tasks.add_task(
+                process_document, 
+                str(file_path), 
+                document_processor, 
+                vector_store
+            )
+
+        logger.info(f"Uploaded {len(files)} documents")
+        return DocumentUploadResponse(
+            message="Documents uploaded and queued for processing",
+            num_processed=len(files),
+            document_ids=document_ids
+        )
+    except Exception as e:
+        logger.error(f"Error uploading documents: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def process_document(file_path: str, document_processor: DocumentProcessor, vector_store: VectorStoreManager):
+    """Process a document and add it to the vector store."""
+    try:
+        logger.info(f"Starting to process document: {file_path}")
+        chunks = document_processor.process_single_document(file_path)
+        if not chunks:
+            logger.warning(f"No chunks generated for document: {file_path}")
+            return
+
+        logger.info(f"Generated {len(chunks)} chunks from document: {file_path}")
+        vector_store.add_documents(chunks)
+        logger.info(f"Successfully processed and added document: {file_path}")
+
+    except DocumentProcessingError as e:
+        logger.error(f"Error processing document {file_path}: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error processing document {file_path}: {e}", exc_info=True)
+
+@app.post("/query", response_model=QueryResponse)
+async def query_documents(
+    request: QueryRequest,
+    query_engine: RAGQueryEngine = Depends(get_query_engine)
+):
+    """Query documents using RAG with optional model selection."""
+    try:
+        result = await query_engine.generate_response(
+            query=request.query,
+            chat_history_id=request.chat_history_id,
+            filter_dict=request.filters,
+            model_name=request.model_name,
+            doc_id=request.doc_id
+        )
+        
+        # Generate a unique ID if not provided
+        chat_history_id = request.chat_history_id or datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        logger.info(f"Processed query: '{request.query[:50]}...'")
+        return QueryResponse(
+            response=result, 
+            sources=[], 
+            chat_history_id=chat_history_id
+        )
+    except QueryError as e:
+        logger.error(f"Error processing query: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error processing query: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/stats", dependencies=[Depends(get_auth_dependency())])
+async def get_stats(vector_store: VectorStoreManager = Depends(get_vector_store)):
+    """Get statistics about the RAG system."""
+    try:
+        vector_store_stats = vector_store.get_collection_stats()
+        return {
+            "vector_store_stats": vector_store_stats,
+            "uploaded_documents": len(list(UPLOAD_DIR.glob("*"))),
+            "chat_histories": len(list(CHAT_HISTORY_DIR.glob("*.json")))
+        }
+    except Exception as e:
+        logger.error(f"Error getting stats: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/clear", dependencies=[Depends(get_auth_dependency())])
+async def clear_system(vector_store: VectorStoreManager = Depends(get_vector_store)):
+    """Clear all documents and reset the system."""
+    try:
+        vector_store.clear_collection()
+        for file in UPLOAD_DIR.glob("*"):
+            file.unlink()
+        for file in CHAT_HISTORY_DIR.glob("*.json"):
+            file.unlink()
+        logger.info("System cleared successfully")
+        return {"message": "System cleared successfully"}
+    except Exception as e:
+        logger.error(f"Error clearing system: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/documents", response_model=DocumentListResponse)
+async def list_documents(vector_store: VectorStoreManager = Depends(get_vector_store)):
+    """List all documents in the system."""
+    try:
+        documents = vector_store.list_documents()
+        total_documents = len(documents)
+        total_chunks = sum(doc['chunk_count'] for doc in documents)
+        logger.info(f"Listed {total_documents} documents with {total_chunks} total chunks")
+        return DocumentListResponse(
+            documents=documents,
+            total_documents=total_documents,
+            total_chunks=total_chunks
+        )
+    except Exception as e:
+        logger.error(f"Error listing documents: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    logger.info(f"Starting server on {settings.api_host}:{settings.api_port}")
+    uvicorn.run(
+        "src.main:app",
+        host=settings.api_host,
+        port=settings.api_port,
+        reload=True
+    )
+
+================
+File: Test_Docs/authentication_security.txt
+================
+# Authentication and Security in Web Applications
+
+This document provides an overview of authentication and security best practices for web applications.
+
+## Authentication Methods
+
+### Password-Based Authentication
+
+Password-based authentication is the most common method of authentication. Users provide a username and password to verify their identity. Best practices include:
+
+- Enforcing strong password policies
+- Implementing account lockout after failed attempts
+- Using secure password hashing algorithms (bcrypt, Argon2)
+- Supporting password reset functionality
+
+### Token-Based Authentication
+
+Token-based authentication uses tokens (like JWT) to authenticate users after initial login:
+
+- JSON Web Tokens (JWT) contain encoded user information
+- Tokens are signed to ensure integrity
+- Tokens can include expiration times
+- Refresh tokens can be used to obtain new access tokens
+
+### Multi-Factor Authentication (MFA)
+
+MFA adds additional security by requiring multiple forms of verification:
+
+- Something you know (password)
+- Something you have (mobile device)
+- Something you are (biometrics)
+
+## Security Best Practices
+
+### HTTPS Implementation
+
+Always use HTTPS to encrypt data in transit:
+
+- Obtain and maintain valid SSL/TLS certificates
+- Configure secure TLS versions and ciphers
+- Implement HTTP Strict Transport Security (HSTS)
+- Redirect HTTP to HTTPS
+
+### Cross-Site Scripting (XSS) Prevention
+
+Prevent XSS attacks by:
+
+- Sanitizing user input
+- Using Content Security Policy (CSP)
+- Implementing proper output encoding
+- Using frameworks with built-in XSS protection
+
+### Cross-Site Request Forgery (CSRF) Protection
+
+Protect against CSRF attacks by:
+
+- Implementing anti-CSRF tokens
+- Checking the Origin and Referer headers
+- Using SameSite cookie attribute
+
+### API Security
+
+Secure your APIs by:
+
+- Implementing proper authentication
+- Using rate limiting to prevent abuse
+- Validating all input
+- Implementing proper error handling
+- Using CORS correctly
+
+## Logging and Monitoring
+
+Implement comprehensive logging and monitoring:
+
+- Log authentication events (successes and failures)
+- Monitor for suspicious activity
+- Set up alerts for potential security incidents
+- Regularly review logs for security issues
+
+## Regular Security Audits
+
+Conduct regular security audits:
+
+- Perform vulnerability scanning
+- Conduct penetration testing
+- Review code for security issues
+- Keep dependencies updated
+
+================
+File: Test_Docs/rag_overview.txt
+================
+# Metis RAG Test Document
+
+This is a test document for the Metis RAG system. It contains some sample information that can be used to test the retrieval and generation capabilities.
+
+## What is RAG?
+
+RAG stands for Retrieval-Augmented Generation. It is a technique that combines the power of large language models with a retrieval system that can fetch relevant information from a knowledge base. This allows the model to generate responses that are grounded in specific documents or data sources.
+
+## Benefits of RAG
+
+1. **Accuracy**: RAG systems can provide more accurate responses by retrieving relevant information before generating an answer.
+2. **Up-to-date Information**: By using a knowledge base that can be updated, RAG systems can provide information that is more current than what the language model was trained on.
+3. **Source Attribution**: RAG systems can cite the sources of information, making the responses more transparent and trustworthy.
+4. **Reduced Hallucinations**: By grounding responses in retrieved information, RAG systems can reduce the tendency of language models to generate plausible-sounding but incorrect information.
+
+## Components of a RAG System
+
+A typical RAG system consists of the following components:
+
+- **Document Processor**: Handles the ingestion and preprocessing of documents.
+- **Vector Store**: Stores document chunks as vector embeddings for efficient retrieval.
+- **Retriever**: Fetches relevant document chunks based on a query.
+- **Generator**: Uses a language model to generate a response based on the retrieved information.
+- **Query Engine**: Coordinates the retrieval and generation process.
+
+## Example Use Cases
+
+RAG systems can be used in various applications, such as:
+
+- **Customer Support**: Answering customer queries based on product documentation.
+- **Research Assistance**: Helping researchers find relevant information in a large corpus of papers.
+- **Knowledge Management**: Making organizational knowledge accessible and usable.
+- **Education**: Providing students with accurate information from textbooks and other educational materials.
+
+This test document should provide enough context for the Metis RAG system to answer questions about RAG technology and its applications.
+
+================
+File: docker-compose.yml
+================
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  rag-app:
+    build: .
+    container_name: rag-app
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+      - ./chat_histories:/app/chat_histories
+      - ./logs:/app/logs
+    environment:
+      - RAG_PROJECT_ROOT=/app
+      - RAG_UPLOADS_DIR=uploads
+      - RAG_CHROMA_DB_PATH=chroma_db
+      - RAG_CHAT_HISTORIES_DIR=chat_histories
+      - RAG_EMBEDDING_MODEL=nomic-embed-text
+      - RAG_LLM_MODEL=llama2
+      - RAG_API_HOST=0.0.0.0
+      - RAG_API_PORT=8002
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - AUTH_ENABLED=true
+      - AUTH_SECRET_KEY=your-secret-key-here-change-in-production
+      - AUTH_TOKEN_EXPIRE_MINUTES=60
+      - AUTH_USERNAME=admin
+      - AUTH_PASSWORD=securepassword
+      - LOG_LEVEL=INFO
+      - LOG_FILE=logs/app.log
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+
+================
+File: Dockerfile
+================
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libmagic1 \
+    poppler-utils \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p uploads chroma_db chat_histories logs
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Expose the port
+EXPOSE 8002
+
+# Run the application
+CMD ["python", "-m", "src.main"]
+
+================
+File: GETTING_STARTED.md
+================
+# Getting Started with Metis RAG
+
+This guide will help you quickly set up and start using the Metis RAG system. Follow these steps to get up and running in minutes.
+
+## Quick Start Guide
+
+### Prerequisites
+
+Before you begin, make sure you have:
+
+1. **Python 3.10+** installed on your system
+2. **Ollama** installed and running (download from [ollama.ai](https://ollama.ai))
+3. Required models pulled in Ollama:
+   ```bash
+   ollama pull nomic-embed-text
+   ollama pull llama2  # or your preferred model
+   ```
+
+### Step 1: Start the Application
+
+The easiest way to start the application is using the provided start script:
+
+```bash
+cd /home/cqhoward/Metis_1
+./start.sh
+```
+
+This script will:
+- Create a virtual environment if it doesn't exist
+- Install dependencies
+- Create necessary directories
+- Generate a default .env file if needed
+- Start the application
+
+Alternatively, if you prefer using Docker:
+
+```bash
+cd /home/cqhoward/Metis_1
+./start_docker.sh
+```
+
+### Step 2: Access the Web Interface
+
+Once the application is running, open your browser and navigate to:
+
+```
+http://localhost:8002
+```
+
+You'll be greeted with the Metis RAG home page.
+
+### Step 3: Log In (if authentication is enabled)
+
+If authentication is enabled (default setting), use these credentials:
+- Username: `admin`
+- Password: `securepassword`
+
+You can change these in the `.env` file.
+
+### Step 4: Upload Test Documents
+
+1. Navigate to the **Documents** page
+2. Click the **Choose Files** button
+3. Select the test documents from the `Test_Docs` directory:
+   - `rag_overview.txt`
+   - `authentication_security.txt`
+4. Click **Upload**
+5. Wait for the documents to be processed (this may take a few moments)
+
+### Step 5: Ask Questions
+
+1. Navigate to the **Chat** page
+2. Type a question in the input field, for example:
+   - "What is RAG and how does it work?"
+   - "What are the benefits of using RAG?"
+   - "What are the best practices for password-based authentication?"
+3. Click **Send**
+4. View the response generated based on your documents
+
+### Step 6: Try Advanced Features
+
+Once you're comfortable with the basics, try these advanced features:
+
+- **Switch Models**: Use the model selector dropdown in the Chat page to try different language models
+- **Document-Specific Queries**: From the Documents page, click the "Query" button next to a specific document to ask questions about only that document
+- **View Statistics**: Navigate to the Stats page to see information about your documents and system performance
+
+## Using the API Programmatically
+
+If you prefer to interact with the system programmatically, use the provided test script:
+
+```bash
+# Upload test documents
+./test_api.py upload Test_Docs/rag_overview.txt Test_Docs/authentication_security.txt
+
+# List all documents
+./test_api.py list
+
+# Query the system
+./test_api.py query "What is RAG?"
+
+# Show system statistics
+./test_api.py stats
+```
+
+## Next Steps
+
+- Add your own documents to the system
+- Experiment with different query formulations
+- Try different language models
+- Explore the code to understand how the system works
+- Customize the system to your needs
+
+## Troubleshooting
+
+If you encounter any issues:
+
+1. Check the logs in the `logs` directory
+2. Make sure Ollama is running and the required models are installed
+3. Verify your `.env` configuration
+4. Restart the application
+
+For more detailed information, refer to the `README.md` file.
+
+================
+File: README.md
+================
+# Metis RAG
+
+Metis RAG is a Retrieval-Augmented Generation system that combines the power of large language models with your own documents. This allows you to get accurate, contextually relevant answers to your questions based on the content of your documents.
+
+## Features
+
+- **Document Processing**: Upload and process multiple document formats (PDF, TXT, DOCX)
+- **Secure Authentication**: User authentication system with JWT tokens
+- **Interactive Web UI**: User-friendly interface for document management and chat
+- **Multiple Model Support**: Switch between different language models
+- **Document-Specific Querying**: Ask questions about specific documents
+- **Comprehensive Logging**: Detailed logging for debugging and monitoring
+- **Error Handling**: Robust error handling with custom exceptions
+- **Docker Support**: Easy deployment with Docker and Docker Compose
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- [Ollama](https://ollama.ai/) for local language models
+- Docker and Docker Compose (optional, for containerized deployment)
+
+### Installation
+
+#### Local Development
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/metis-rag.git
+   cd metis-rag
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Create a `.env` file with your configuration:
+   ```
+   RAG_EMBEDDING_MODEL=nomic-embed-text
+   RAG_LLM_MODEL=llama2
+   OLLAMA_BASE_URL=http://localhost:11434
+   RAG_OLLAMA_MAX_RETRIES=3
+   RAG_OLLAMA_RETRY_DELAY=1
+   RAG_UPLOADS_DIR=uploads
+   RAG_CHROMA_DB_PATH=chroma_db
+   RAG_CHAT_HISTORIES_DIR=chat_histories
+   RAG_API_HOST=0.0.0.0
+   RAG_API_PORT=8002
+   
+   # Authentication settings
+   AUTH_ENABLED=true
+   AUTH_SECRET_KEY=your-secret-key-here-change-in-production
+   AUTH_TOKEN_EXPIRE_MINUTES=60
+   AUTH_USERNAME=admin
+   AUTH_PASSWORD=securepassword
+   
+   # Logging settings
+   LOG_LEVEL=INFO
+   LOG_FILE=logs/app.log
+   ```
+
+5. Create required directories:
+   ```bash
+   mkdir -p uploads chroma_db chat_histories logs
+   ```
+
+6. Start the application:
+   ```bash
+   ./start.sh
+   ```
+
+7. Access the web interface at http://localhost:8002
+
+#### Docker Deployment
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/metis-rag.git
+   cd metis-rag
+   ```
+
+2. Start the containers:
+   ```bash
+   ./start_docker.sh
+   ```
+
+3. Access the web interface at http://localhost:8002
+
+## Usage
+
+### Uploading Documents
+
+1. Navigate to the Documents page
+2. Click the "Choose Files" button and select one or more documents
+3. Click "Upload" to upload and process the documents
+
+### Asking Questions
+
+1. Navigate to the Chat page
+2. Type your question in the input field
+3. Click "Send" to get an answer based on your documents
+
+### Switching Models
+
+1. Use the model selector dropdown in the Chat page
+2. Select a different model to switch to it
+
+### Viewing Statistics
+
+1. Navigate to the Stats page to view system statistics
+2. See information about the vector store, uploaded documents, and chat histories
+
+## Test Documents and API Script
+
+### Test Documents
+
+The repository includes sample test documents in the `Test_Docs` directory:
+
+- `rag_overview.txt` - Information about RAG technology and its components
+- `authentication_security.txt` - Information about authentication methods and security best practices
+
+You can use these documents to test the system without having to create your own.
+
+### API Testing Script
+
+The repository includes a Python script `test_api.py` that demonstrates how to interact with the API programmatically:
+
+```bash
+# Upload test documents
+./test_api.py upload Test_Docs/rag_overview.txt Test_Docs/authentication_security.txt
+
+# List all documents
+./test_api.py list
+
+# Query the system
+./test_api.py query "What is RAG?"
+
+# Query a specific document
+./test_api.py query "What are the benefits of RAG?" doc_id=<doc_id>
+
+# List available models
+./test_api.py models
+
+# Show system statistics
+./test_api.py stats
+```
+
+This script is useful for testing the API and for understanding how to integrate the Metis RAG system with other applications.
+
+## API Endpoints
+
+- `/upload` - Upload documents
+- `/query` - Query documents
+- `/documents` - List documents
+- `/stats` - Get system statistics
+- `/clear` - Clear all data
+- `/system/models` - List available models
+- `/system/models/{model_name}` - Switch to a specific model
+- `/auth/token` - Get authentication token
+
+## Project Structure
+
+```
+metis-rag/
+├── src/
+│   ├── api/
+│   │   ├── models/
+│   │   │   ├── auth.py
+│   │   │   ├── requests.py
+│   │   │   └── responses.py
+│   │   ├── routers/
+│   │   │   ├── auth.py
+│   │   │   ├── system.py
+│   │   │   └── web.py
+│   │   ├── dependencies.py
+│   │   └── error_handlers.py
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── exceptions.py
+│   │   ├── logging_config.py
+│   │   ├── ollama_client.py
+│   │   └── text_generation.py
+│   ├── rag/
+│   │   ├── document_processor.py
+│   │   ├── query_engine.py
+│   │   └── vector_store.py
+│   └── main.py
+├── frontend/
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── styles.css
+│   │   └── js/
+│   │       └── app.js
+│   └── templates/
+│       ├── base.html
+│       ├── chat.html
+│       ├── documents.html
+│       ├── error.html
+│       ├── index.html
+│       ├── login.html
+│       └── stats.html
+├── Test_Docs/
+│   ├── rag_overview.txt
+│   └── authentication_security.txt
+├── uploads/
+├── chroma_db/
+├── chat_histories/
+├── logs/
+├── .env
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── start.sh
+├── start_docker.sh
+└── test_api.py
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- [LangChain](https://github.com/langchain-ai/langchain) for the RAG components
+- [FastAPI](https://fastapi.tiangolo.com/) for the API framework
+- [Ollama](https://ollama.ai/) for local language models
+- [Chroma](https://www.trychroma.com/) for vector storage
+
+================
+File: requirements.txt
+================
+# Core dependencies
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-core>=0.1.10
+langchain-ollama>=0.0.3
+langchain-chroma>=0.0.1
+sentence-transformers>=2.2.2
+chromadb>=0.4.22
+python-dotenv>=1.0.0
+unstructured>=0.10.30
+pdf2image>=1.16.3
+python-magic>=0.4.27
+tiktoken>=0.5.2
+fastapi>=0.109.0
+uvicorn>=0.27.0
+pydantic>=2.5.3
+python-multipart>=0.0.6
+pdfminer.six>=20221105
+httpx==0.24.1
+
+# Authentication dependencies
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Frontend dependencies
+jinja2>=3.0.0
+aiofiles>=0.8.0
+
+# Testing dependencies
+pytest
+pytest-asyncio
+pytest-httpx
+requests
+
+================
+File: start_docker.sh
+================
+#!/bin/bash
+
+# Start script for Metis RAG application using Docker
+
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    echo "Docker is not installed. Please install Docker first."
+    echo "Visit https://docs.docker.com/get-docker/ for installation instructions."
+    exit 1
+fi
+
+# Check if Docker Compose is installed
+if ! command -v docker-compose &> /dev/null; then
+    echo "Docker Compose is not installed. Please install Docker Compose first."
+    echo "Visit https://docs.docker.com/compose/install/ for installation instructions."
+    exit 1
+fi
+
+# Create required directories if they don't exist
+mkdir -p uploads chroma_db chat_histories logs
+
+# Start the containers
+echo "Starting Metis RAG containers..."
+docker-compose up -d
+
+# Wait for Ollama to start
+echo "Waiting for Ollama to start..."
+sleep 10
+
+# Check if models are available, pull if not
+echo "Checking for required models..."
+if ! docker exec -it ollama ollama list | grep -q "nomic-embed-text"; then
+    echo "Pulling nomic-embed-text model..."
+    docker exec -it ollama ollama pull nomic-embed-text
+fi
+
+if ! docker exec -it ollama ollama list | grep -q "llama2"; then
+    echo "Pulling llama2 model..."
+    docker exec -it ollama ollama pull llama2
+fi
+
+# Show logs
+echo "Containers started. Showing logs (press Ctrl+C to exit logs, containers will continue running)..."
+docker-compose logs -f
+
+# Instructions for stopping
+echo "To stop the containers, run: docker-compose down"
+
+================
+File: start.sh
+================
+#!/bin/bash
+
+# Start script for Metis RAG application
+
+# Create required directories if they don't exist
+mkdir -p uploads chroma_db chat_histories logs
+
+# Check if virtual environment exists
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+    source venv/bin/activate
+    echo "Installing dependencies..."
+    pip install -r requirements.txt
+else
+    source venv/bin/activate
+fi
+
+# Check if .env file exists
+if [ ! -f ".env" ]; then
+    echo "Creating default .env file..."
+    cat > .env << EOL
+RAG_EMBEDDING_MODEL=nomic-embed-text
+RAG_LLM_MODEL=llama2
+OLLAMA_BASE_URL=http://localhost:11434
+RAG_OLLAMA_MAX_RETRIES=3
+RAG_OLLAMA_RETRY_DELAY=1
+RAG_UPLOADS_DIR=uploads
+RAG_CHROMA_DB_PATH=chroma_db
+RAG_CHAT_HISTORIES_DIR=chat_histories
+RAG_API_HOST=0.0.0.0
+RAG_API_PORT=8002
+
+# Authentication settings
+AUTH_ENABLED=true
+AUTH_SECRET_KEY=your-secret-key-here-change-in-production
+AUTH_TOKEN_EXPIRE_MINUTES=60
+AUTH_USERNAME=admin
+AUTH_PASSWORD=securepassword
+
+# Logging settings
+LOG_LEVEL=INFO
+LOG_FILE=logs/app.log
+EOL
+    echo ".env file created. Please edit it with your settings."
+fi
+
+# Check if Ollama is running
+if ! curl -s http://localhost:11434/api/tags > /dev/null; then
+    echo "Warning: Ollama doesn't seem to be running. Please start Ollama first."
+    echo "You can download Ollama from https://ollama.ai/"
+    echo "After installing, run 'ollama serve' in a separate terminal."
+    echo "Then run 'ollama pull nomic-embed-text' and 'ollama pull llama2' (or your preferred model)."
+    read -p "Do you want to continue anyway? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+# Start the application
+echo "Starting Metis RAG application..."
+python -m src.main
+
+================
+File: test_api.py
+================
+#!/usr/bin/env python3
+"""
+Test script for the Metis RAG API.
+This script demonstrates how to interact with the API programmatically.
+"""
+
+import requests
+import json
+import sys
+import os
+from pathlib import Path
+import time
+
+# API URL (change if needed)
+BASE_URL = "http://localhost:8002"
+
+# Authentication (if enabled)
+AUTH_ENABLED = True
+AUTH_USERNAME = "admin"
+AUTH_PASSWORD = "securepassword"
+
+def get_auth_token():
+    """Get authentication token if auth is enabled."""
+    if not AUTH_ENABLED:
+        return None
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/token",
+            data={"username": AUTH_USERNAME, "password": AUTH_PASSWORD}
+        )
+        response.raise_for_status()
+        return response.json()["access_token"]
+    except Exception as e:
+        print(f"Error getting auth token: {e}")
+        return None
+
+def get_headers():
+    """Get headers with authentication token if needed."""
+    token = get_auth_token()
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+def test_stats():
+    """Test the stats endpoint."""
+    print("\n--- Testing /stats endpoint ---")
+    try:
+        response = requests.get(f"{BASE_URL}/stats", headers=get_headers())
+        response.raise_for_status()
+        stats = response.json()
+        print("Stats endpoint returned successfully!")
+        print(f"Vector store stats: {json.dumps(stats['vector_store_stats'], indent=2)}")
+        print(f"Uploaded documents: {stats['uploaded_documents']}")
+        print(f"Chat histories: {stats['chat_histories']}")
+        return stats
+    except Exception as e:
+        print(f"Error getting stats: {e}")
+        return None
+
+def upload_document(file_paths):
+    """Upload one or more documents."""
+    print(f"\n--- Uploading documents: {file_paths} ---")
+    success = True
+    
+    headers = get_headers()
+    if "Authorization" in headers:
+        # Remove Content-Type for multipart/form-data
+        headers.pop("Content-Type")
+    
+    for file_path in file_paths:
+        if not Path(file_path).exists():
+            print(f"Error: File {file_path} does not exist.")
+            success = False
+            continue
+
+        try:
+            with open(file_path, 'rb') as f:
+                files = {'files': (Path(file_path).name, f)}
+                response = requests.post(
+                    f"{BASE_URL}/upload", 
+                    files=files,
+                    headers=headers
+                )
+                response.raise_for_status()
+                result = response.json()
+                print(f"Upload successful for {file_path}: {result['message']}")
+                print(f"  Document IDs: {result['document_ids']}")
+        except Exception as e:
+            print(f"Error uploading {file_path}: {e}")
+            success = False
+    
+    return success
+
+def list_documents():
+    """List all documents."""
+    print("\n--- Listing documents ---")
+    try:
+        response = requests.get(f"{BASE_URL}/documents", headers=get_headers())
+        response.raise_for_status()
+        result = response.json()
+        print(f"Total documents: {result['total_documents']}")
+        print(f"Total chunks: {result['total_chunks']}")
+
+        if result['documents']:
+            print("\nDocument list:")
+            for doc in result['documents']:
+                print(f"  - ID: {doc['doc_id']}, File: {doc['file_name']} ({doc['file_type']}), Chunks: {doc['chunk_count']}, Source: {doc['source']}")
+        else:
+            print("No documents found in the system.")
+        return result['documents']
+    except Exception as e:
+        print(f"Error listing documents: {e}")
+        return []
+
+def test_query(query_text, model_name=None, doc_id=None):
+    """Test the query endpoint."""
+    print(f"\n--- Testing query: '{query_text}' ---")
+    payload = {"query": query_text}
+    if model_name:
+        payload["model_name"] = model_name
+    if doc_id:
+        payload["doc_id"] = doc_id
+
+    try:
+        response = requests.post(
+            f"{BASE_URL}/query",
+            json=payload,
+            headers=get_headers()
+        )
+        response.raise_for_status()
+        result = response.json()
+        print("Query successful!")
+        print(f"\nResponse: {result['response']}")
+        print(f"\nChat history ID: {result['chat_history_id']}")
+        return result
+    except Exception as e:
+        print(f"Error querying: {e}")
+        return None
+
+def list_models():
+    """List available models."""
+    print("\n--- Listing models ---")
+    try:
+        response = requests.get(f"{BASE_URL}/system/models", headers=get_headers())
+        response.raise_for_status()
+        result = response.json()
+        print("Available models:")
+        for model in result['models']:
+            print(f"  - {model['name']}")
+        return result['models']
+    except Exception as e:
+        print(f"Error listing models: {e}")
+        return []
+
+def main():
+    """Main function."""
+    print("=== Metis RAG API Test ===")
+
+    # Check if the API is available
+    try:
+        requests.get(f"{BASE_URL}/system/health")
+    except requests.exceptions.ConnectionError:
+        print(f"Error: Cannot connect to {BASE_URL}. Make sure the server is running.")
+        sys.exit(1)
+
+    # Process command line arguments
+    if len(sys.argv) > 1:
+        command = sys.argv[1].lower()
+
+        if command == "upload" and len(sys.argv) > 2:
+            file_paths = sys.argv[2:]
+            if upload_document(file_paths):
+                print("\nWaiting for background processing to complete...")
+                time.sleep(5)
+                list_documents()
+
+        elif command == "query" and len(sys.argv) > 2:
+            query_text = sys.argv[2]
+            model_name = None
+            doc_id = None
+            
+            if len(sys.argv) > 3:
+                for arg in sys.argv[3:]:
+                    if arg.startswith("model="):
+                        model_name = arg.split("=")[1]
+                    elif arg.startswith("doc_id="):
+                        doc_id = arg.split("=")[1]
+            
+            test_query(query_text, model_name, doc_id)
+
+        elif command == "list":
+            list_documents()
+
+        elif command == "models":
+            list_models()
+
+        elif command == "stats":
+            test_stats()
+
+        else:
+            print_usage()
+    else:
+        # Run all tests if no command is provided
+        print("Running all tests...")
+        test_stats()
+        list_models()
+        list_documents()
+        print("\nTest script completed. Use specific commands for more detailed testing.")
+        print_usage()
+
+def print_usage():
+    print("\nUsage:")
+    print("  python test_api.py upload <file_path1> [<file_path2> ...]  - Upload documents")
+    print("  python test_api.py query <query_text> [model=<model_name>] [doc_id=<doc_id>] - Test a query")
+    print("  python test_api.py list                - List documents")
+    print("  python test_api.py models              - List available models")
+    print("  python test_api.py stats               - Show system statistics")
+
+if __name__ == "__main__":
+    main()
+
+
+
+================================================================
+End of Codebase
+================================================================

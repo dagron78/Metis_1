@@ -1,0 +1,125 @@
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+/* Code formatting */
+pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+}
+
+code {
+    background-color: #f1f1f1;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+/* Chat styles */
+.chat-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+.system-message {
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb;
+    color: #721c24 !important;
+    font-style: italic;
+}
+
+/* Document list styles */
+.document-card {
+    transition: transform 0.2s;
+}
+
+.document-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 1050;
+}
+
+/* Card hover effects */
+.card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Button styles */
+.btn {
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Navbar active link */
+.nav-link.active {
+    font-weight: bold;
+    border-bottom: 2px solid white;
+}
+
+/* Footer styles */
+.footer {
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message {
+        max-width: 90%;
+    }
+    
+    .jumbotron h1 {
+        font-size: 2rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* Dark mode support (if enabled by user) */
+@media (prefers-color-scheme: dark) {
+    .chat-messages {
+        background-color: #343a40;
+    }
+    
+    .assistant-message {
+        background-color: #495057;
+        color: #f8f9fa;
+    }
+    
+    code {
+        background-color: #343a40;
+        color: #f8f9fa;
+    }
+    
+    pre {
+        background-color: #343a40;
+        color: #f8f9fa;
+    }
+}

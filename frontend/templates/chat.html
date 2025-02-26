@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Metis RAG{% endblock %}
+
+{% block head %}
+<style>
+    .chat-container {
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+    }
+    
+    .message {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+    }
+    
+    .user-message {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+    
+    .assistant-message {
+        background-color: #e9ecef;
+        color: #212529;
+        align-self: flex-start;
+    }
+    
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
+    
+    .chat-input {
+        margin-top: 1rem;
+    }
+    
+    .model-selector {
+        margin-bottom: 1rem;
+    }
+    
+    .system-message {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+        font-style: italic;
+    }
+    
+    .source-info {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Chat with Your Documents</h1>
+    
+    <div class="model-selector">
+        <select class="form-select" id="modelSelector">
+            <option value="">Loading models...</option>
+        </select>
+    </div>
+</div>
+
+{% if doc_id %}
+<div class="alert alert-info">
+    <strong>Document Filter Active:</strong> You are querying a specific document. <a href="/ui/chat" class="alert-link">Clear filter</a>
+</div>
+{% endif %}
+
+<div class="chat-container card">
+    <div class="chat-messages" id="chatMessages">
+        <div class="message assistant-message">
+            <div class="message-content">
+                Hello! I'm your RAG assistant. Ask me questions about your documents.
+                {% if doc_id %}
+                <br><br>You are currently querying a specific document.
+                {% endif %}
+            </div>
+            <div class="message-time">Now</div>
+        </div>
+    </div>
+    
+    <div class="chat-input p-3">
+        <form id="chatForm">
+            <div class="input-group">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type your question..." required>
+                <button class="btn btn-primary" type="submit" id="sendButton">
+                    <span id="sendButtonText">Send</span>
+                    <span id="sendButtonSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Chat History</h5>
+    </div>
+    <div class="card-body">
+        <div class="list-group" id="chatHistoryList">
+            <!-- Chat history will be loaded here -->
+            <div class="text-center">No chat history yet</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentModel = '';
+    let chatHistoryId = '';
+    let docId = new URLSearchParams(window.location.search).get('doc_id');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        loadModels();
+        
+        // Chat form handling
+        const chatForm = document.getElementById('chatForm');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const sendButtonText = document.getElementById('sendButtonText');
+        const sendButtonSpinner = document.getElementById('sendButtonSpinner');
+        
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Disable input and show spinner
+            messageInput.disabled = true;
+            sendButtonText.classList.add('d-none');
+            sendButtonSpinner.classList.remove('d-none');
+            
+            // Send query to API
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: message,
+                    model_name: currentModel || undefined,
+                    doc_id: docId || undefined,
+                    chat_history_id: chatHistoryId || undefined
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Query failed: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Add assistant response to chat
+                addMessage(data.response, 'assistant');
+                
+                // Save chat history ID
+                chatHistoryId = data.chat_history_id;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Sorry, an error occurred while processing your request: ' + error.message, 'assistant', true);
+            })
+            .finally(() => {
+                // Re-enable input and hide spinner
+                messageInput.disabled = false;
+                messageInput.value = '';
+                messageInput.focus();
+                sendButtonText.classList.remove('d-none');
+                sendButtonSpinner.classList.add('d-none');
+            });
+        });
+        
+        // Model selector handling
+        document.getElementById('modelSelector').addEventListener('change', function(e) {
+            currentModel = e.target.value;
+            
+            if (currentModel) {
+                fetch(`/system/models/${currentModel}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Model switch failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    addMessage(`Switched to model: ${data.current_model}`, 'assistant', true);
+                })
+                .catch(error => {
+                    console.error('Error switching model:', error);
+                    addMessage('Error switching model: ' + error.message, 'assistant', true);
+                });
+            }
+        });
+    });
+    
+    function loadModels() {
+        fetch('/system/models')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load models: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const modelSelector = document.getElementById('modelSelector');
+                modelSelector.innerHTML = '<option value="">Default Model</option>';
+                
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelector.appendChild(option);
+                });
+                
+                // Get current model
+                fetch('/system/models/current')
+                    .then(response => response.json())
+                    .then(data => {
+                        currentModel = data.current_model;
+                        
+                        // Select current model in dropdown
+                        for (let i = 0; i < modelSelector.options.length; i++) {
+                            if (modelSelector.options[i].value === currentModel) {
+                                modelSelector.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    });
+            })
+            .catch(error => {
+                console.error('Error loading models:', error);
+                document.getElementById('modelSelector').innerHTML = '<option value="">Default Model</option>';
+            });
+    }
+    
+    function addMessage(content, sender, isSystem = false) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        
+        messageDiv.className = `message ${sender}-message`;
+        if (isSystem) messageDiv.classList.add('system-message');
+        
+        messageDiv.innerHTML = `
+            <div class="message-content">${formatMessage(content)}</div>
+            <div class="message-time">${new Date().toLocaleTimeString()}</div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function formatMessage(content) {
+        // Convert URLs to links
+        content = content.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        
+        // Convert markdown-style code blocks
+        content = content.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+        
+        // Convert markdown-style inline code
+        content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
+        // Convert line breaks to <br>
+        content = content.replace(/\n/g, '<br>');
+        
+        return content;
+    }
+</script>
+{% endblock %}

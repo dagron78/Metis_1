@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Metis RAG{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-light p-5 rounded">
+    <h1 class="display-4">Welcome to Metis RAG</h1>
+    <p class="lead">A powerful Retrieval-Augmented Generation system for your documents.</p>
+    <hr class="my-4">
+    <p>Upload documents, ask questions, and get AI-powered answers based on your content.</p>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary btn-lg" href="/documents" role="button">Manage Documents</a>
+        <a class="btn btn-success btn-lg" href="/chat" role="button">Start Chatting</a>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Upload Documents</h5>
+                <p class="card-text">Upload your documents to make them available for querying. Supported formats include PDF, TXT, and DOCX files.</p>
+                <a href="/documents" class="btn btn-primary">Go to Documents</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Ask Questions</h5>
+                <p class="card-text">Ask questions about your documents and get AI-powered answers using state-of-the-art language models.</p>
+                <a href="/chat" class="btn btn-primary">Go to Chat</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">System Stats</h5>
+                <p class="card-text">View system statistics, document counts, and performance metrics to monitor your RAG system.</p>
+                <a href="/stats" class="btn btn-primary">View Stats</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <h2>About Metis RAG</h2>
+    <p>
+        Metis RAG is a Retrieval-Augmented Generation system that combines the power of large language models with your own documents.
+        This allows you to get accurate, contextually relevant answers to your questions based on the content of your documents.
+    </p>
+    <p>
+        Key features:
+    </p>
+    <ul>
+        <li>Upload and process multiple document formats</li>
+        <li>Secure authentication system</li>
+        <li>Interactive chat interface</li>
+        <li>Support for multiple language models</li>
+        <li>Document-specific querying</li>
+        <li>Comprehensive logging and error handling</li>
+    </ul>
+</div>
+{% endblock %}

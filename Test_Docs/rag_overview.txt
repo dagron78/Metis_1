@@ -1,0 +1,35 @@
+# Metis RAG Test Document
+
+This is a test document for the Metis RAG system. It contains some sample information that can be used to test the retrieval and generation capabilities.
+
+## What is RAG?
+
+RAG stands for Retrieval-Augmented Generation. It is a technique that combines the power of large language models with a retrieval system that can fetch relevant information from a knowledge base. This allows the model to generate responses that are grounded in specific documents or data sources.
+
+## Benefits of RAG
+
+1. **Accuracy**: RAG systems can provide more accurate responses by retrieving relevant information before generating an answer.
+2. **Up-to-date Information**: By using a knowledge base that can be updated, RAG systems can provide information that is more current than what the language model was trained on.
+3. **Source Attribution**: RAG systems can cite the sources of information, making the responses more transparent and trustworthy.
+4. **Reduced Hallucinations**: By grounding responses in retrieved information, RAG systems can reduce the tendency of language models to generate plausible-sounding but incorrect information.
+
+## Components of a RAG System
+
+A typical RAG system consists of the following components:
+
+- **Document Processor**: Handles the ingestion and preprocessing of documents.
+- **Vector Store**: Stores document chunks as vector embeddings for efficient retrieval.
+- **Retriever**: Fetches relevant document chunks based on a query.
+- **Generator**: Uses a language model to generate a response based on the retrieved information.
+- **Query Engine**: Coordinates the retrieval and generation process.
+
+## Example Use Cases
+
+RAG systems can be used in various applications, such as:
+
+- **Customer Support**: Answering customer queries based on product documentation.
+- **Research Assistance**: Helping researchers find relevant information in a large corpus of papers.
+- **Knowledge Management**: Making organizational knowledge accessible and usable.
+- **Education**: Providing students with accurate information from textbooks and other educational materials.
+
+This test document should provide enough context for the Metis RAG system to answer questions about RAG technology and its applications.

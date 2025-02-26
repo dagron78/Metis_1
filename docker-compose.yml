@@ -1,0 +1,43 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  rag-app:
+    build: .
+    container_name: rag-app
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+      - ./chat_histories:/app/chat_histories
+      - ./logs:/app/logs
+    environment:
+      - RAG_PROJECT_ROOT=/app
+      - RAG_UPLOADS_DIR=uploads
+      - RAG_CHROMA_DB_PATH=chroma_db
+      - RAG_CHAT_HISTORIES_DIR=chat_histories
+      - RAG_EMBEDDING_MODEL=nomic-embed-text
+      - RAG_LLM_MODEL=llama2
+      - RAG_API_HOST=0.0.0.0
+      - RAG_API_PORT=8002
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - AUTH_ENABLED=true
+      - AUTH_SECRET_KEY=your-secret-key-here-change-in-production
+      - AUTH_TOKEN_EXPIRE_MINUTES=60
+      - AUTH_USERNAME=admin
+      - AUTH_PASSWORD=securepassword
+      - LOG_LEVEL=INFO
+      - LOG_FILE=logs/app.log
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

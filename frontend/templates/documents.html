@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Documents - Metis RAG{% endblock %}
+
+{% block content %}
+<h1>Document Management</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Upload Documents</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" action="/upload" enctype="multipart/form-data" id="uploadForm">
+            <div class="mb-3">
+                <label for="files" class="form-label">Select Files</label>
+                <input class="form-control" type="file" id="files" name="files" multiple>
+                <div class="form-text">Supported formats: PDF, TXT, DOCX</div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="uploadBtn">Upload</button>
+        </form>
+        <div class="progress mt-3 d-none" id="uploadProgress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">Document List</h3>
+        <button class="btn btn-sm btn-outline-danger" id="clearAllBtn">Clear All</button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="documentsTable">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Type</th>
+                        <th>Chunks</th>
+                        <th>Added</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="documentsList">
+                    <!-- Documents will be loaded here -->
+                    <tr>
+                        <td colspan="5" class="text-center">Loading documents...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Document management JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDocuments();
+        
+        // Upload form handling
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = uploadProgress.querySelector('.progress-bar');
+        
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            
+            uploadBtn.disabled = true;
+            uploadProgress.classList.remove('d-none');
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Upload failed: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showToast('Documents uploaded successfully', 'success');
+                setTimeout(loadDocuments, 2000); // Reload after a delay
+            })
+            .catch(error => {
+                showToast('Error uploading documents: ' + error, 'danger');
+            })
+            .finally(() => {
+                uploadBtn.disabled = false;
+                uploadProgress.classList.add('d-none');
+                uploadForm.reset();
+            });
+            
+            // Simulate progress (in a real app, you'd use actual progress events)
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${Math.min(progress, 95)}%`;
+                if (progress >= 95) clearInterval(interval);
+            }, 200);
+        });
+        
+        // Clear all documents
+        document.getElementById('clearAllBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete ALL documents? This cannot be undone.')) {
+                fetch('/clear', {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Clear failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showToast(data.message, 'success');
+                    loadDocuments();
+                })
+                .catch(error => {
+                    showToast('Error clearing documents: ' + error, 'danger');
+                });
+            }
+        });
+    });
+    
+    function loadDocuments() {
+        fetch('/documents')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load documents: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const documentsList = document.getElementById('documentsList');
+                
+                if (data.documents.length === 0) {
+                    documentsList.innerHTML = '<tr><td colspan="5" class="text-center">No documents found</td></tr>';
+                    return;
+                }
+                
+                documentsList.innerHTML = '';
+                data.documents.forEach(doc => {
+                    const addedDate = new Date(doc.added_at).toLocaleString();
+                    documentsList.innerHTML += `
+                        <tr>
+                            <td>${doc.file_name}</td>
+                            <td>${doc.file_type}</td>
+                            <td>${doc.chunk_count}</td>
+                            <td>${addedDate}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="queryDocument('${doc.doc_id}')">Query</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(error => {
+                showToast('Error loading documents: ' + error, 'danger');
+            });
+    }
+    
+    function queryDocument(docId) {
+        window.location.href = `/ui/chat?doc_id=${docId}`;
+    }
+    
+    function showToast(message, type) {
+        const toastContainer = document.getElementById('toastContainer');
+        const toastId = 'toast-' + Date.now();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.id = toastId;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+</script>
+{% endblock %}
