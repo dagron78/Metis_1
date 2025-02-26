@@ -1,3 +1,4 @@
+
 # Metis RAG
 
 Metis RAG is a Retrieval-Augmented Generation system that combines the power of large language models with your own documents. This allows you to get accurate, contextually relevant answers to your questions based on the content of your documents.
@@ -300,4 +301,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [LangChain](https://github.com/langchain-ai/langchain) for the RAG components
 - [FastAPI](https://fastapi.tiangolo.com/) for the API framework
 - [Ollama](https://ollama.ai/) for local language models
+<<<<<<< HEAD
 - [Chroma](https://www.trychroma.com/) for vector storage
+=======
+- [Chroma](https://www.trychroma.com/) for vector storage
+>>>>>>> 6f10e44 (Initial commit of Metis RAG project)
+>>>>>>> adbadd8 (Resolve merge conflict in README.md)
